@@ -4,3 +4,5 @@ pydantic
 scipy
 shapely
 rich
+pandas
+matplotlib
