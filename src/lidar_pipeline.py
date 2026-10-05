@@ -126,11 +126,10 @@ class LidarReconstructionPipeline:
             
         all_pts = np.vstack(all_pts)
         
-        # Voxel downsampling
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(all_pts)
-        pcd = pcd.voxel_down_sample(voxel_size=self.voxel_size)
-        downsampled_pts = np.asarray(pcd.points)
+        # Deterministic voxel downsampling
+        coords = np.round(all_pts / self.voxel_size).astype(int)
+        _, indices = np.unique(coords, axis=0, return_index=True)
+        downsampled_pts = all_pts[indices]
         
         drift_stats = {
             "total_path_length_m": round(float(total_path_length), 3),
@@ -143,11 +142,9 @@ class LidarReconstructionPipeline:
         return downsampled_pts, traj_positions, drift_stats
 
     def extract_vertical_planes(self, pts: np.ndarray) -> Tuple[float, float, float, np.ndarray]:
-        """Extract floor and ceiling planes and compute clear room ceiling height."""
-        # ARKit world frame: Y is vertical axis
+        """Extract floor and ceiling planes deterministically without RANSAC."""
         y_coords = pts[:, 1]
         
-        # Histogram of Y coordinates
         hist, bin_edges = np.histogram(y_coords, bins=100)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
         
@@ -155,38 +152,36 @@ class LidarReconstructionPipeline:
         floor_bin_idx = np.argmax(hist[:len(hist)//3])
         y_floor_est = bin_centers[floor_bin_idx]
         
-        # Refine floor with RANSAC on points near floor
-        floor_mask = (y_coords >= y_floor_est - 0.20) & (y_coords <= y_floor_est + 0.20)
+        # Refine floor deterministically (mean of points within 10cm of peak)
+        floor_mask = (y_coords >= y_floor_est - 0.10) & (y_coords <= y_floor_est + 0.10)
         floor_pts = pts[floor_mask]
         
         if len(floor_pts) > 100:
-            pcd_floor = o3d.geometry.PointCloud()
-            pcd_floor.points = o3d.utility.Vector3dVector(floor_pts)
-            plane_model, _ = pcd_floor.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=500)
-            # Plane: a*x + b*y + c*z + d = 0 -> y = -(a*x + c*z + d)/b
-            y_floor = -plane_model[3] / plane_model[1]
+            y_floor = float(np.mean(floor_pts[:, 1]))
         else:
-            y_floor = y_floor_est
+            y_floor = float(y_floor_est)
             
         # Ceiling is highest points with significant cluster
         upper_mask = y_coords > (y_floor + 1.8)
         upper_pts = pts[upper_mask]
         
-        if len(upper_pts) > 200:
+        if len(upper_pts) > 500:
             hist_ceil, bin_edges_ceil = np.histogram(upper_pts[:, 1], bins=40)
             bin_centers_ceil = (bin_edges_ceil[:-1] + bin_edges_ceil[1:]) / 2.0
             ceil_bin_idx = np.argmax(hist_ceil)
             y_ceil_est = bin_centers_ceil[ceil_bin_idx]
             
-            ceil_mask = (y_coords >= y_ceil_est - 0.20) & (y_coords <= y_ceil_est + 0.20)
-            pcd_ceil = o3d.geometry.PointCloud()
-            pcd_ceil.points = o3d.utility.Vector3dVector(pts[ceil_mask])
-            plane_ceil, _ = pcd_ceil.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=500)
-            y_ceil = -plane_ceil[3] / plane_ceil[1]
-            ceiling_height = float(abs(y_ceil - y_floor))
+            ceil_mask = (y_coords >= y_ceil_est - 0.10) & (y_coords <= y_ceil_est + 0.10)
+            ceil_pts = pts[ceil_mask]
+            
+            if len(ceil_pts) > 100:
+                y_ceil = float(np.mean(ceil_pts[:, 1]))
+                ceiling_height = float(abs(y_ceil - y_floor))
+            else:
+                y_ceil = y_floor + 2.75
+                ceiling_height = 2.75
         else:
-            # Fallback if ceiling was not directly scanned
-            y_ceil = y_floor + 2.75 # Standard 2.75m default
+            y_ceil = y_floor + 2.75
             ceiling_height = 2.75
             
         # Extract torso slice (above furniture, below ceiling)
@@ -233,22 +228,47 @@ class LidarReconstructionPipeline:
             aligned_pts = xz_pts
             
         # 2D Bounding extraction using oriented alpha shape / grid density
-        min_x, max_x = np.percentile(aligned_pts[:, 0], [1, 99])
-        min_z, max_z = np.percentile(aligned_pts[:, 1], [1, 99])
+        grid_res = 0.05
+        min_x_val, max_x_val = np.min(aligned_pts[:, 0]), np.max(aligned_pts[:, 0])
+        min_z_val, max_z_val = np.min(aligned_pts[:, 1]), np.max(aligned_pts[:, 1])
         
-        # Fit orthogonal bounding boundary
-        # For a clean room representation, fit Manhattan bounding polygon
-        x0, x1 = float(min_x), float(max_x)
-        z0, z1 = float(min_z), float(max_z)
+        width = int(np.ceil((max_x_val - min_x_val) / grid_res)) + 40
+        height = int(np.ceil((max_z_val - min_z_val) / grid_res)) + 40
         
-        # Rectangular / Manhattan baseline polygon
-        corners_aligned = np.array([
-            [x0, z0],
-            [x1, z0],
-            [x1, z1],
-            [x0, z1]
-        ])
+        grid = np.zeros((height, width), dtype=np.uint8)
         
+        u = ((aligned_pts[:, 0] - min_x_val) / grid_res + 20).astype(int)
+        v = ((aligned_pts[:, 1] - min_z_val) / grid_res + 20).astype(int)
+        
+        valid = (u >= 0) & (u < width) & (v >= 0) & (v < height)
+        grid[v[valid], u[valid]] = 255
+        
+        # Connect sparse points into continuous walls
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
+        grid = cv2.morphologyEx(grid, cv2.MORPH_CLOSE, kernel, iterations=2)
+        grid = cv2.dilate(grid, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
+        
+        contours, _ = cv2.findContours(grid, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if contours:
+            largest_contour = max(contours, key=cv2.contourArea)
+            # Simplify contour to polygons
+            peri = cv2.arcLength(largest_contour, True)
+            approx = cv2.approxPolyDP(largest_contour, 0.02 * peri, True)
+            
+            approx_pts = approx.reshape(-1, 2)
+            corners_aligned = (approx_pts - 20) * grid_res + np.array([min_x_val, min_z_val])
+            
+            # Ensure at least a triangle
+            if len(corners_aligned) < 3:
+                x0, x1 = float(np.percentile(aligned_pts[:, 0], 1)), float(np.percentile(aligned_pts[:, 0], 99))
+                z0, z1 = float(np.percentile(aligned_pts[:, 1], 1)), float(np.percentile(aligned_pts[:, 1], 99))
+                corners_aligned = np.array([[x0, z0], [x1, z0], [x1, z1], [x0, z1]])
+        else:
+            x0, x1 = float(np.percentile(aligned_pts[:, 0], 1)), float(np.percentile(aligned_pts[:, 0], 99))
+            z0, z1 = float(np.percentile(aligned_pts[:, 1], 1)), float(np.percentile(aligned_pts[:, 1], 99))
+            corners_aligned = np.array([[x0, z0], [x1, z0], [x1, z1], [x0, z1]])
+            
         # Rotate back to original world orientation if needed
         if drift_correction:
             c_inv, s_inv = np.cos(theta), np.sin(theta)

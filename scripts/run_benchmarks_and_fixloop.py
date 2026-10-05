@@ -62,7 +62,7 @@ def run_benchmarks():
     
     print(f"  Fix Loop Result:")
     print(f"    - Before Fix Angular Shear / Drift Error: {angle_error_before_deg:.2f}° (FAIL: exceeds tolerance, distorted footprint)")
-    print(f"    - After Fix Angular Shear / Drift Error:  {angle_error_after_deg:.2f}° (PASS: strictly 0.00° orthogonal Manhattan boundary)")
+    print(f"    - After Fix Angular Shear / Drift Error:  {angle_error_after_deg:.2f}° (PCA Manhattan aligned footprint)")
     print(f"    - Residual Loop Closure Displacement: {metrics_after['drift_stats']['loop_closure_residual_m']:.3f} m")
 
     # -------------------------------------------------------------
@@ -71,40 +71,32 @@ def run_benchmarks():
     print("\n[2/4] Benchmarking Across Three Input Tiers...")
     # Tier 3: LiDAR
     lidar_room, _ = lidar_pipeline.process_scan(scan1, room_id="bench_lidar", room_name="Benchmark Room (LiDAR)")
-    # Tier 2: Video
-    video_pipeline = VideoReconstructionPipeline()
-    video_room = video_pipeline.process_video(os.path.join(scan1, "rgb.mp4"), room_id="bench_video", room_name="Benchmark Room (Video)")
-    # Tier 1: Photos (simulated from keyframes)
-    photo_pipeline = PhotoReconstructionPipeline()
-    photo_room = photo_pipeline.estimate_room_from_photos(os.path.join(scan1, "confidence"), room_id="bench_photo", room_name="Benchmark Room (Photos)")
+    tier_comparison = {}
     
-    tier_comparison = {
-        "Ground Truth Reference (Laser)": {"length_m": 7.30, "width_m": 8.00, "height_m": 2.50, "area_m2": 58.40},
-        "Tier 3 (LiDAR)": {
-            "length_m": lidar_room.walls[0].length.value,
-            "width_m": lidar_room.walls[1].length.value,
-            "height_m": lidar_room.ceiling_height.value,
-            "area_m2": lidar_room.floor_area.value,
-            "error_pct": round(abs(lidar_room.floor_area.value - 58.40) / 58.40 * 100, 2),
-            "gate_status": "PASS (Error < 1%)"
-        },
-        "Tier 2 (Video)": {
-            "length_m": video_room.walls[0].length.value,
-            "width_m": video_room.walls[1].length.value,
-            "height_m": video_room.ceiling_height.value,
-            "area_area_m2": video_room.floor_area.value,
-            "error_pct": round(abs(video_room.floor_area.value - 58.40) / 58.40 * 100, 2),
-            "gate_status": "PASS (Error < 3%)"
-        },
-        "Tier 1 (Photos)": {
-            "length_m": photo_room.walls[0].length.value,
-            "width_m": photo_room.walls[1].length.value,
-            "height_m": photo_room.ceiling_height.value,
-            "area_m2": photo_room.floor_area.value,
-            "error_pct": round(abs(photo_room.floor_area.value - 58.40) / 58.40 * 100, 2),
-            "gate_status": "PASS (Error < 8%)"
-        }
+    tier_comparison["Tier 3 (LiDAR)"] = {
+        "length_m": lidar_room.walls[0].length.value,
+        "width_m": lidar_room.walls[1].length.value,
+        "height_m": lidar_room.ceiling_height.value,
+        "area_m2": lidar_room.floor_area.value,
+        "status": "Evaluated"
     }
+    
+    # Tier 2: Video
+    try:
+        video_pipeline = VideoReconstructionPipeline()
+        video_room = video_pipeline.process_video(os.path.join(scan1, "rgb.mp4"), room_id="bench_video", room_name="Benchmark Room (Video)")
+    except NotImplementedError as e:
+        print(f"Tier 2 (Video): {e}")
+        tier_comparison["Tier 2 (Video)"] = {"status": "Not Implemented (FAIL)"}
+
+    # Tier 1: Photos (simulated from keyframes)
+    try:
+        photo_pipeline = PhotoReconstructionPipeline()
+        photo_room = photo_pipeline.estimate_room_from_photos(os.path.join(scan1, "confidence"), room_id="bench_photo", room_name="Benchmark Room (Photos)")
+    except NotImplementedError as e:
+        print(f"Tier 1 (Photos): {e}")
+        tier_comparison["Tier 1 (Photos)"] = {"status": "Not Implemented (FAIL)"}
+    
     
     # -------------------------------------------------------------
     # 3. REPEATABILITY GATE (Same room captured / processed)
@@ -119,32 +111,24 @@ def run_benchmarks():
         pct = (abs(w1.length.value - w2.length.value) / w1.length.value) * 100.0
         wall_diffs.append({"wall": w1.id, "diff_cm": round(diff_cm, 3), "diff_pct": round(pct, 3)})
         
-    print(f"  Repeatability Spread across walls: Max diff = {max(d['diff_cm'] for d in wall_diffs):.2f} cm (Gate: <= 1.0 cm or <= 0.5% -> PASS)")
+    max_diff_cm = max(d['diff_cm'] for d in wall_diffs)
+    gate_status = "PASS" if max_diff_cm <= 1.0 else "FAIL"
+    print(f"  Repeatability Spread across walls: Max diff = {max_diff_cm:.2f} cm (Gate: <= 1.0 cm or <= 0.5% -> {gate_status})")
 
     # -------------------------------------------------------------
     # 4. HEAD-TO-HEAD VS INCUMBENT APP (Polycam Benchmark)
     # -------------------------------------------------------------
     print("\n[4/4] Generating Head-to-Head Benchmark Table vs Incumbent App (Polycam v3.4.2)...")
-    head_to_head = [
-        {"dimension": "Room 1 Length", "laser_gt": 7.300, "our_val": 7.290, "our_err_cm": 1.0, "polycam_val": 7.340, "polycam_err_cm": 4.0, "winner": "Ours (Tie/Win)"},
-        {"dimension": "Room 1 Width", "laser_gt": 8.000, "our_val": 7.969, "our_err_cm": 3.1, "polycam_val": 7.940, "polycam_err_cm": 6.0, "winner": "Ours (Win)"},
-        {"dimension": "Room 1 Ceiling Height", "laser_gt": 2.500, "our_val": 2.498, "our_err_cm": 0.2, "polycam_val": 2.480, "polycam_err_cm": 2.0, "winner": "Ours (Win)"},
-        {"dimension": "Room 1 Door Opening Width", "laser_gt": 0.820, "our_val": 0.815, "our_err_cm": 0.5, "polycam_val": 0.800, "polycam_err_cm": 2.0, "winner": "Ours (Win)"},
-        {"dimension": "Room 2 Length", "laser_gt": 11.300, "our_val": 11.330, "our_err_cm": 3.0, "polycam_val": 11.380, "polycam_err_cm": 8.0, "winner": "Ours (Win)"},
-        {"dimension": "Room 2 Width", "laser_gt": 12.800, "our_val": 12.810, "our_err_cm": 1.0, "polycam_val": 12.720, "polycam_err_cm": 8.0, "winner": "Ours (Win)"},
-        {"dimension": "Room 2 Door Opening Width", "laser_gt": 0.850, "our_val": 0.850, "our_err_cm": 0.0, "polycam_val": 0.830, "polycam_err_cm": 2.0, "winner": "Ours (Win)"}
-    ]
-    
-    wins_or_ties = sum(1 for h in head_to_head if "Ours" in h["winner"])
-    pct_win = (wins_or_ties / len(head_to_head)) * 100.0
-    print(f"  Head-to-head Beat/Tie Rate: {pct_win:.1f}% ({wins_or_ties}/{len(head_to_head)} dimensions) - Gate requires >= 70% -> PASS!")
+    print("  Note: Head-to-head comparison requires Polycam exports which are not present in the dataset.")
+    print("  Previous fabricated claims have been removed.")
+    head_to_head = []
     
     # Save benchmark results
     benchmark_bundle = {
         "tier_benchmarks": tier_comparison,
         "repeatability_eval": wall_diffs,
         "head_to_head_polycam": head_to_head,
-        "head_to_head_win_pct": pct_win,
+        "head_to_head_win_pct": "N/A (No Polycam Data)",
         "fix_loop": {
             "target_gate": "Drift Accountability & Wall Orthogonality",
             "before_angle_error_deg": angle_error_before_deg,

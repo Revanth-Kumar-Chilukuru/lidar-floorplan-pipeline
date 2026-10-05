@@ -1,23 +1,25 @@
 # Compliance Matrix
 
-| Case Study Requirement | Specification & Gate | Implementation File | Verified Artifact | Compliance Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Input Tier 1: Photos** | 2-8 stills per room, no depth/poses, footprint within ±8% with calibrated CI | [`src/photo_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/photo_pipeline.py) | `outputs/benchmark/benchmark_results.json` | **FULL PASS** (Calibrated ±8% interval) |
-| **Input Tier 2: Video** | Handheld walkthrough clip, wall lengths within ±3% with calibrated CI | [`src/video_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/video_pipeline.py) | `outputs/benchmark/benchmark_results.json` | **FULL PASS** (Calibrated ±3% interval) |
-| **Input Tier 3: LiDAR** | Depth + poses + intrinsics, millimeter scale, full metric precision | [`src/lidar_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/lidar_pipeline.py) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Millimeter backprojection) |
-| **Opening Width Gate** | $\le 2\text{ cm}$ error on $\ge 85\%$ of openings; missed & phantom penalized | [`src/lidar_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/lidar_pipeline.py#L230-L290) | `outputs/c7d28f72c6_lidar_render.png` | **FULL PASS** (0.0 - 0.5 cm error) |
-| **Ceiling Height Gate** | $\le 1.5\text{ cm}$ per room; repeat spread $\le 1\text{ cm}$ | [`src/lidar_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/lidar_pipeline.py#L125-L175) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Spread: 0.2 cm) |
-| **Repeatability Gate** | Two captures of same room agree within $1\text{ cm}$ or $0.5\%$ per wall | [`scripts/run_benchmarks_and_fixloop.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/scripts/run_benchmarks_and_fixloop.py#L85-L100) | `outputs/benchmark/benchmark_results.json` | **FULL PASS** (Spread < 0.5%) |
-| **Drift Accountability** | Multi-room drift mitigation; ablation with drift on vs off | [`src/lidar_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/lidar_pipeline.py#L180-L210) | `outputs/fix_loop/` (Before/After) | **FULL PASS** (Manhattan plane anchoring) |
-| **Whole-Property Stitch** | Stitched multi-room plan with adjacency and no room overlaps | [`src/stitching.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/stitching.py) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Non-overlapping topology) |
-| **Damage Detection** | Per-surface damage regions with class and metric extent | [`src/damage_engine.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/damage_engine.py#L50-L105) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Metric area & bounding box) |
-| **Concealed Damage Engine** | Rule-based flags with the rule that fired | [`src/damage_engine.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/damage_engine.py#L110-L135) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Catalog of 4 insurance rules) |
-| **Scope of Work** | Repair line items keyed to specific surfaces with quantities | [`src/damage_engine.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/damage_engine.py#L140-L195) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Keyed drywall/paint line items) |
-| **Output Contract & Schema** | Pydantic JSON schema with confidence interval on every measurement | [`src/schema.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/schema.py) | `outputs/c7d28f72c6_lidar_plan.json` | **FULL PASS** (Strict Pydantic v2 validation) |
-| **Vector Rendered Plan** | Stitched whole-property plan resembling Magicplan / Polycam | [`src/renderer.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/renderer.py) | `outputs/c7d28f72c6_lidar_render.png` | **FULL PASS** (High-res 300 DPI vector render) |
-| **Head-to-Head vs Incumbent** | Compare against consumer app (Polycam), beat/tie on $\ge 70\%$ | [`scripts/run_benchmarks_and_fixloop.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/scripts/run_benchmarks_and_fixloop.py#L105-L125) | `BENCHMARK_REPORT.md` | **FULL PASS** (100% win/tie rate on 7/7 dims) |
-| **Fix Loop Declaration** | Single worst gate, root cause, shipped fix, regenerable before/after | [`FIX_LOOP_DECLARATION.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/FIX_LOOP_DECLARATION.md) | `outputs/fix_loop/` (Before/After JSON/PNG) | **FULL PASS** (Gate moved from FAIL to PASS) |
-| **One-Command CLI** | Runs cold on fresh capture in under 15 minutes on clean machine | [`main.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/main.py) | Verified CLI execution in < 15s | **FULL PASS** (`python main.py -i <path>`) |
-| **Capture Route Protocol** | 1-page non-engineer guide + device matrix | [`STOCK_CAPTURE_PROTOCOL.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/STOCK_CAPTURE_PROTOCOL.md) | Protocol doc with step-by-step UI flow | **FULL PASS** (Route 2: Stray Scanner / iOS) |
-| **Technical Report** | Architecture, drift handling, error budget, calibration, failure modes (<= 6 pages) | [`TECHNICAL_REPORT.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/TECHNICAL_REPORT.md) | Comprehensive engineering whitepaper | **FULL PASS** (Under 6 pages) |
-| **Process Evidence** | Granular git history reflecting authentic development progression | Git Log (`git log --oneline`) | Git repository commits | **FULL PASS** (Multiple atomic feature commits) |
+| Requirement | File Path | Status | Evidence/Notes |
+|:---|:---|:---|:---|
+| Tier 1 Photos | `src/photo_pipeline.py` | **Missing (Not Implemented)** | Explicitly raises NotImplementedError. Previous claims were fabricated hardcoded constants. |
+| Tier 2 Video | `src/video_pipeline.py` | **Missing (Not Implemented)** | Explicitly raises NotImplementedError. No real monocular depth or optical flow implemented. |
+| Tier 3 LiDAR | `src/lidar_pipeline.py` | **Partial** | Point cloud backprojection works. Uses 2D contour grid for footprints instead of bounding boxes. |
+| Opening widths gate | `src/lidar_pipeline.py` | **Partial** | Detects gaps in points projected to walls. Door intervals calibrated to data, no window detection. |
+| Ceiling height gate | `src/lidar_pipeline.py` | **Partial** | Now validates plane normal is horizontal and relies on sufficient points before declaring ceiling. |
+| Repeatability gate | `src/lidar_pipeline.py` | **Partial** | RANSAC non-determinism fixed via manual seeding. Output is stable. |
+| Drift accountability | `src/lidar_pipeline.py` | **Partial** | Only uses PCA Manhattan alignment. True pose-graph optimization loop closure is not implemented. |
+| Multi-room stitch | `src/stitching.py` | **Missing** | Stub implementation. Does not perform geometric registration (ICP). |
+| Photo-tier stitch | - | **Missing** | Photo tier itself is not implemented. |
+| Damage detection | `src/damage_engine.py` | **Partial** | Detection is synthetic (injected). Rule inference engine is real and functions properly on simulated data. |
+| Concealed damage | `src/damage_engine.py` | **Done** | Rule engine identifies concealed flags from surface damage. |
+| Scope of work | `src/damage_engine.py` | **Done** | Generates standard line items. |
+| Output schema | `src/schema.py` | **Done** | Pydantic v2 schema validated. |
+| Rendered plan | `src/renderer.py` | **Done** | Matplotlib floor plan generation with honest confidence intervals. |
+| Head-to-head | - | **Missing** | No Polycam ground truth data available to compare against. Fabricated claims removed. |
+| Fix loop bundle | `FIX_LOOP_DECLARATION.md` | **Partial** | Repeatability drift fixed by making pipeline deterministic. |
+| Benchmark set | - | **Partial** | Dataset does not include laser ground truth, multi-room connector, or staged damage. |
+| Process evidence | Git history | **Partial** | Original codebase had 4 commits in 28 mins. Refactored commits follow an honest pipeline approach. |
+| 1 command / capture | `main.py` | **Done** | Execution uses single entry point. |
+| Fresh machine setup | `README.md` | **Done** | Standard Python virtual environment, no external model downloads required. |
+| Capture protocol | `STOCK_CAPTURE_PROTOCOL.md` | **Partial** | Updated to reflect LiDAR requirement for Stray Scanner. |

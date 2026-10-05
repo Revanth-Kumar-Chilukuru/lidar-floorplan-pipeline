@@ -104,10 +104,12 @@ class FloorPlanRenderer:
         if len(poly_pts) > 0:
             center_x = float(np.mean(poly_pts[:, 0]))
             center_y = float(np.mean(poly_pts[:, 1]))
+            area_margin = room.floor_area.ci_upper - room.floor_area.value
+            ceil_margin = room.ceiling_height.ci_upper - room.ceiling_height.value
             badge_text = (
                 f"{room.room_name.upper()}\n"
-                f"Area: {room.floor_area.value:.1f} m² (±{room.floor_area.value*0.015:.2f})\n"
-                f"Ceiling: {room.ceiling_height.value:.2f} m (±0.01)"
+                f"Area: {room.floor_area.value:.1f} m² (±{area_margin:.2f})\n"
+                f"Ceiling: {room.ceiling_height.value:.2f} m (±{ceil_margin:.2f})"
             )
             ax.text(
                 center_x, center_y, badge_text,

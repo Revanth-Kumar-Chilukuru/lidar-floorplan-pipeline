@@ -39,7 +39,7 @@ This one-page protocol is designed for non-engineer operators (claim adjusters, 
   1. Start in the entryway or primary room.
   2. Walk continuously along the room perimeter in a clockwise loop.
   3. Traverse connectors (hallways) with a sweeping motion across both walls.
-  4. **Always return to your starting room/position to close the trajectory loop.** (This enables the pipeline's loop-closure drift correction).
+  4. **Always return to your starting room/position to close the trajectory loop.** (Best practice for scanning, though true loop-closure is not currently implemented in the pipeline; the pipeline relies on Manhattan alignment).
 * **Ceiling & Openings:** At doorway transitions, pause for 1 second and tilt the device up smoothly toward the ceiling joist, then level back to chest height.
 
 #### C. What to Avoid
@@ -60,16 +60,5 @@ This one-page protocol is designed for non-engineer operators (claim adjusters, 
      python main.py --input path/to/c7d28f72c6 --tier lidar
      ```
 
-2. **Video Tier:**
-   * Record a continuous handheld walkthrough clip (`.mp4` / `.mov`).
-   * Run:
-     ```bash
-     python main.py --input path/to/walkthrough.mp4 --tier video
-     ```
-
-3. **Photo Tier:**
-   * Take 2 to 8 photos per room (capturing corners and openings). Place each room's photos in a folder (`room_photos/`).
-   * Run:
-     ```bash
-     python main.py --input path/to/room_photos/ --tier photos
-     ```
+2. **Video Tier & Photo Tier:**
+   * **Note:** The Video and Photo tiers are currently **not implemented** in the software pipeline due to hardware/compute constraints. If they were implemented, they would require standard RGB video or HEIC photos captured from the native iOS Camera app.

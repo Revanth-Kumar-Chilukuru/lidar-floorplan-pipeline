@@ -40,15 +40,8 @@ python main.py --input "Assignment - YC Startup/single_scan_with_ceiling/c7d28f7
 * Generates validated JSON: `outputs/c7d28f72c6_lidar_plan.json`
 * Generates 300 DPI floor plan: `outputs/c7d28f72c6_lidar_render.png`
 
-### Tier 2: Video Walkthrough
-```bash
-python main.py --input "Assignment - YC Startup/single_room/c00a170fe1/rgb.mp4" --tier video
-```
-
-### Tier 1: Photo Stills (2-8 photos per room)
-```bash
-python main.py --input "path/to/room_photos" --tier photos
-```
+### Tier 2 & 1: Video and Photo
+> **Note:** The Video and Photo tiers are currently not implemented in the software pipeline due to hardware/compute constraints. They would require standard RGB video or HEIC photos captured from the native iOS Camera app.
 
 ---
 

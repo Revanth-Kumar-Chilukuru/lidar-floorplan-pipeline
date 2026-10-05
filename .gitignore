@@ -33,3 +33,5 @@ scratch/
 .idea/
 .DS_Store
 Thumbs.db
+
+eval_output/

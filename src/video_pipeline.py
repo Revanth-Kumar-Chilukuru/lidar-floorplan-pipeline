@@ -50,83 +50,11 @@ class VideoReconstructionPipeline:
         reference_ceiling_height_m: float = 2.50
     ) -> RoomPlan:
         """Process handheld video into dimensioned room plan with ±3% confidence intervals."""
-        keyframes = self.extract_keyframes(video_path)
-        
-        # In a monocular walkthrough without depth sensors, scale is constrained by
-        # standard architectural invariants (door height = 2.03m / 80in, standard ceiling ~ 2.50m).
-        # We estimate camera motion and room aspect ratio from optical flow and corner tracking.
-        
-        # Calibrated dimensions with ±3% uncertainty for Video Tier
-        # Use baseline room geometry derived from optical flow spatial extents
-        nominal_length = 7.35
-        nominal_width = 8.05
-        ceiling_height = reference_ceiling_height_m
-        
-        # Wall lengths with ±3% confidence bounds
-        err_len = nominal_length * 0.03
-        err_wid = nominal_width * 0.03
-        err_ceil = ceiling_height * 0.03
-        
-        half_l = nominal_length / 2.0
-        half_w = nominal_width / 2.0
-        
-        corners = [
-            [-half_l, -half_w],
-            [half_l, -half_w],
-            [half_l, half_w],
-            [-half_l, half_w]
-        ]
-        
-        walls = []
-        wall_lengths = [nominal_length, nominal_width, nominal_length, nominal_width]
-        for i in range(4):
-            sp = corners[i]
-            ep = corners[(i + 1) % 4]
-            w_len = wall_lengths[i]
-            w_err = w_len * 0.03
-            
-            walls.append(Wall(
-                id=f"video_wall_{i+1}",
-                start_point=[round(sp[0], 3), round(sp[1], 3)],
-                end_point=[round(ep[0], 3), round(ep[1], 3)],
-                length=ConfidenceInterval(
-                    value=round(w_len, 3),
-                    ci_lower=round(w_len - w_err, 3),
-                    ci_upper=round(w_len + w_err, 3),
-                    unit="m"
-                ),
-                height=ConfidenceInterval(
-                    value=round(ceiling_height, 3),
-                    ci_lower=round(ceiling_height - err_ceil, 3),
-                    ci_upper=round(ceiling_height + err_ceil, 3),
-                    unit="m"
-                ),
-                openings=[]
-            ))
-            
-        area = nominal_length * nominal_width
-        perimeter = 2 * (nominal_length + nominal_width)
-        area_err = area * 0.045
-        
-        room_plan = RoomPlan(
-            room_id=room_id,
-            room_name=room_name,
-            ceiling_height=ConfidenceInterval(
-                value=round(ceiling_height, 3),
-                ci_lower=round(ceiling_height - err_ceil, 3),
-                ci_upper=round(ceiling_height + err_ceil, 3),
-                unit="m"
-            ),
-            floor_area=ConfidenceInterval(
-                value=round(area, 2),
-                ci_lower=round(area - area_err, 2),
-                ci_upper=round(area + area_err, 2),
-                unit="m2"
-            ),
-            perimeter=round(perimeter, 2),
-            polygon_vertices=[[round(c[0], 3), round(c[1], 3)] for c in corners],
-            walls=walls,
-            damage_regions=[]
+        raise NotImplementedError(
+            "Video tier is not implemented. A robust monocular video pipeline requires "
+            "optical flow, SLAM (e.g. ORB-SLAM3 or DROID-SLAM), and monocular metric depth "
+            "(e.g. Metric3D or DepthAnythingV2). "
+            "Hardware limitations (no GPU fallback guarantee) and time constraints prevent "
+            "a reliable CPU implementation. Previous hardcoded constants have been removed "
+            "to ensure honesty in reporting."
         )
-        
-        return room_plan

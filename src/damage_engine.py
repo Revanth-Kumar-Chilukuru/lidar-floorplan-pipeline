@@ -124,7 +124,8 @@ class DamageAssessmentEngine:
         for dmg in damage_regions:
             for rule in self.CONCEALED_RULES:
                 match_class = (rule["trigger_class"] == dmg.damage_class)
-                match_surf = (rule["trigger_surface"] in dmg.surface_type)
+                # Bug fix: allow rule["trigger_surface"] like 'wall_base' to match dmg.surface_type 'wall'
+                match_surf = (dmg.surface_type in rule["trigger_surface"]) or (rule["trigger_surface"] in dmg.surface_type)
                 
                 if match_class and match_surf:
                     flags.append(ConcealedDamageFlag(
