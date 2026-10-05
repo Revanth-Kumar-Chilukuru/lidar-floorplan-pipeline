@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Submission Guide</title>
+<style>
+@page { size: A4; margin: 1.5cm; }
+body { font-family: -apple-system, sans-serif; font-size: 10.5pt; line-height: 1.45; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #cbd5e1; padding: 5px; text-align: left; }
+</style>
+</head>
+<body><h1>Submission Guide: Property Capture Pipeline</h1>
+<p><strong>Project</strong>: An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans and automated repair scopes of work.
+<strong>Repository</strong>: <code>&lt;Your-Repo-Name&gt;</code></p>
+<h2>Quick Start (3 Commands)</h2>
+<pre><code class="language-bash"># 1. Clone and enter repo
+git clone &lt;repo_url&gt; &amp;&amp; cd &lt;repo_name&gt;
+
+# 2. Setup environment (Python 3.11 required)
+uv venv --python 3.11 &amp;&amp; uv pip install -r requirements.txt
+
+# 3. Reproduce all verified claims
+.venv/Scripts/python scripts/reproduce_all.py
+</code></pre>
+<h2>Device &amp; Tier Matrix</h2>
+<p>| Tier | Required Hardware | Status | What it Delivers |
+|---|---|---|---|
+| <strong>Tier 3 (LiDAR)</strong> | iPhone 12+ Pro, iPad Pro 2020+ | <strong>Active</strong> | 2D dimensioned floor plans, orthogonal wall footprint, metric scale, room boundaries. |
+| <strong>Tier 2 (Video)</strong> | iPhone 11-16 (Any) | <strong>Not Implemented</strong> | Explicitly fails cleanly. Requires GPU/SLAM. |
+| <strong>Tier 1 (Photos)</strong> | Any modern smartphone | <strong>Not Implemented</strong> | Explicitly fails cleanly. Requires LayoutNet models. |</p>
+<p><strong>Hardware Constraint Note</strong>: The author does not own an iPhone. All captures and code tests were run using the provided sample <code>Stray Scanner</code> dataset. As Stray Scanner requires an active LiDAR sensor, processing data from non-Pro phones or video/photo fallbacks is not currently possible on this CPU-bound pipeline without fabricating results.</p>
+<h2>Verification Status</h2>
+<p><strong>Verified:</strong></p>
+<ul>
+<li>✅ <strong>Algorithmic Determinism</strong>: Deterministic math replaces RANSAC/Open3D, ensuring 0 variance on the same data.</li>
+<li>✅ <strong>Honest Null-Safety</strong>: Missing ceilings or out-of-bounds constraints are strictly reported as &quot;unmeasured&quot; (null) rather than defaulted to arbitrary integers.</li>
+<li>✅ <strong>Trajectory Bounding</strong>: Extracted footprint fully encompasses the camera tracking path for all sample scans.</li>
+</ul>
+<p><strong>Not Verified:</strong></p>
+<ul>
+<li>❌ <strong>Physical Repeatability</strong>: We cannot prove scan-to-scan physical reproducibility without multiple physical captures of the same room.</li>
+<li>❌ <strong>Head-to-Head Accuracy</strong>: No <code>Polycam</code> exports were available in the dataset for a true comparison.</li>
+<li>❌ <strong>Opening Detection Accuracy</strong>: &quot;±2 cm on ≥85% gate&quot; for opening detection remains unverified, as no laser/tape ground truth exists in the dataset.</li>
+</ul>
+<h2>Known Failure Modes</h2>
+<ol>
+<li><strong>Pose-Graph Drift</strong>: True SLAM loop closure is not implemented. A PCA footprint alignment heuristic partially corrects orthogonal orientation, but cumulative odometry drift remains in large loops.</li>
+<li><strong>Disconnected Wall Convex Hull</strong>: To bound the trajectory, we rely on a Convex Hull which may overestimate concave or L-shaped rooms if large gaps exist in the walls.</li>
+</ol>
+<h2>Deliverables Index</h2>
+<ul>
+<li><code>README.md</code>: Entry point and reproduction steps.</li>
+<li><code>TECHNICAL_REPORT.pdf</code>: Honest architectural analysis and algorithm decisions.</li>
+<li><code>COMPLIANCE_MATRIX.md</code>: Mapping of prompt requirements to code realities.</li>
+<li><code>FIX_LOOP_DECLARATION.md</code>: Before/after metrics for the determinism fix.</li>
+<li><code>STOCK_CAPTURE_PROTOCOL.md</code>: Operator instructions for LiDAR capturing.</li>
+<li><code>results/</code>: Output artifacts (JSON payloads, renders).</li>
+</ul>
+</body>
+</html>
