@@ -28,6 +28,13 @@ cache/
 tmp/
 scratch/
 
+# Allow subset data and results to be tracked
+!data/
+!data/sample_subset/
+!data/sample_subset/**
+!results/
+!results/**
+
 # IDE & OS
 .vscode/
 .idea/
@@ -35,3 +42,7 @@ scratch/
 Thumbs.db
 
 eval_output/
+!data/sample_subset/**/depth/
+!data/sample_subset/**/confidence/
+!data/sample_subset/**/depth/*.png
+!data/sample_subset/**/confidence/*.png

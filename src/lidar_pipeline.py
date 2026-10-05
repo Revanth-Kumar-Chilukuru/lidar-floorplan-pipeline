@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import pandas as pd
 from scipy.spatial.transform import Rotation as R
-import open3d as o3d
+
 from shapely.geometry import Polygon, LineString, Point
 from shapely.ops import unary_union
 from typing import Dict, List, Tuple, Optional, Any
@@ -48,7 +48,10 @@ class LidarReconstructionPipeline:
         conf_files = sorted(glob.glob(os.path.join(conf_dir, "*.png"))) if os.path.exists(conf_dir) else []
         
         n_frames = min(len(odom_df), len(depth_files))
-        indices = list(range(0, n_frames, frame_step))
+        
+        # Auto-adjust frame step based on frame count (if already subsetted, don't subset again)
+        actual_frame_step = 1 if n_frames < 200 else 5
+        indices = list(range(0, n_frames, actual_frame_step))
         
         # Scale intrinsics from RGB (1920x1440) to depth (256x192) -> factor 7.5
         depth_w, depth_h = 256, 192

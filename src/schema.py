@@ -2,10 +2,10 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 class ConfidenceInterval(BaseModel):
-    """Calibrated confidence interval representing measurement uncertainty."""
+    """Confidence interval representing measurement uncertainty heuristic."""
     value: Optional[float] = Field(None, description="Estimated nominal measurement value. None if unmeasured.")
-    ci_lower: Optional[float] = Field(None, description="Lower bound of 95% confidence interval")
-    ci_upper: Optional[float] = Field(None, description="Upper bound of 95% confidence interval")
+    ci_lower: Optional[float] = Field(None, description="Lower bound of confidence interval")
+    ci_upper: Optional[float] = Field(None, description="Upper bound of confidence interval")
     unit: str = Field("m", description="Unit of measurement (m, m2, deg)")
     is_prior: bool = Field(False, description="True if value is an unmeasured prior/default.")
 
@@ -75,7 +75,6 @@ class WholePropertyPlan(BaseModel):
     """Complete multi-room property plan with adjacency, damage, and scope."""
     property_id: str = Field(..., description="Property scan identifier")
     capture_tier: str = Field(..., description="'lidar', 'video', 'photos'")
-    timestamp: str = Field(..., description="Capture/processing timestamp")
     total_floor_area: ConfidenceInterval = Field(..., description="Total enclosed floor area")
     rooms: List[RoomPlan] = Field(..., description="Dimensioned rooms")
     room_adjacencies: List[Dict[str, Any]] = Field(default_factory=list, description="Topological connections between rooms")

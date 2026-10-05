@@ -22,9 +22,9 @@ def run_benchmarks():
     lidar_pipeline = LidarReconstructionPipeline()
     renderer = FloorPlanRenderer()
     
-    scan1 = "Assignment - YC Startup/single_room/c00a170fe1"
-    scan2 = "Assignment - YC Startup/single_scan_floor_only/1a8384c3f6"
-    scan3 = "Assignment - YC Startup/single_scan_with_ceiling/c7d28f72c6"
+    scan1 = "data/sample_subset/single_room/c00a170fe1"
+    scan2 = "data/sample_subset/single_scan_floor_only/1a8384c3f6"
+    scan3 = "data/sample_subset/single_scan_with_ceiling/c7d28f72c6"
     
     # -------------------------------------------------------------
     # 1. FIX LOOP: Manhattan Alignment Ablation (Not True Drift Correction)

@@ -25,13 +25,13 @@ def main():
     
     # 1. Run single room LiDAR scan
     run_command(
-        f'"{python_bin}" main.py --input "Assignment - YC Startup/single_room/c00a170fe1" --tier lidar --output-dir outputs/reproduced',
+        f'"{python_bin}" main.py --input "data/sample_subset/single_room/c00a170fe1" --tier lidar --output-dir results',
         "Running Tier 3 LiDAR Scan on Single Room"
     )
     
     # 2. Run scan with ceiling
     run_command(
-        f'"{python_bin}" main.py --input "Assignment - YC Startup/single_scan_with_ceiling/c7d28f72c6" --tier lidar --output-dir outputs/reproduced',
+        f'"{python_bin}" main.py --input "data/sample_subset/single_scan_with_ceiling/c7d28f72c6" --tier lidar --output-dir results',
         "Running Tier 3 LiDAR Scan on Multi-Room with Ceiling"
     )
     

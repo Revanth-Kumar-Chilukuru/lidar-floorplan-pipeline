@@ -7,7 +7,7 @@ An end-to-end computer vision and spatial AI pipeline that transforms smartphone
 ## 🚀 Quickstart: Setup to Cold Run in Under 10 Minutes
 
 ### Prerequisites
-* Python 3.11 or 3.12
+* Python 3.11
 * [uv](https://github.com/astral-sh/uv) (recommended) or standard `pip`
 * Windows, Linux, or macOS
 
@@ -18,7 +18,7 @@ git clone <repo-url>
 cd AI_Assignment_YC
 
 # Create environment and install dependencies via uv
-uv venv --python 3.12
+uv venv --python 3.11
 uv pip install -r requirements.txt
 ```
 

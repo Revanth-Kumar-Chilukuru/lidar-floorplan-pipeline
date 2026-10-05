@@ -99,7 +99,6 @@ class PropertyStitchingEngine:
         property_plan = WholePropertyPlan(
             property_id=property_id,
             capture_tier=capture_tier,
-            timestamp=datetime.utcnow().isoformat(),
             total_floor_area=total_area_ci,
             rooms=rooms,
             room_adjacencies=adjacencies,
