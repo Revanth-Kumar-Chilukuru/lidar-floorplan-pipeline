@@ -96,23 +96,10 @@ def run_benchmarks():
     
     
     # -------------------------------------------------------------
-    # 3. REPEATABILITY GATE (Same room captured / processed)
+    # 3. REPEATABILITY GATE (Self-comparison removed)
     # -------------------------------------------------------------
     print("\n[3/4] Evaluating Repeatability Gate...")
-    room_rep1, _ = lidar_pipeline.process_scan(scan1, room_id="rep_1")
-    room_rep2, _ = lidar_pipeline.process_scan(scan1, room_id="rep_2")
-    
-    wall_diffs = []
-    for w1, w2 in zip(room_rep1.walls, room_rep2.walls):
-        diff_cm = abs(w1.length.value - w2.length.value) * 100.0
-        pct = (abs(w1.length.value - w2.length.value) / w1.length.value) * 100.0
-        wall_diffs.append({"wall": w1.id, "diff_cm": round(diff_cm, 3), "diff_pct": round(pct, 3)})
-        
-    max_diff_cm = max(d['diff_cm'] for d in wall_diffs)
-    gate_status = "PASS" if max_diff_cm <= 1.0 else "FAIL"
-    print(f"  Repeatability Spread across walls: Max diff = {max_diff_cm:.2f} cm (Gate: <= 1.0 cm or <= 0.5% -> {gate_status})")
-
-    # -------------------------------------------------------------
+    print("  Note: Self-comparison of a scan to itself has been removed. See scripts/run_fix_loop.py for genuine algorithmic determinism test across separate processes, and FIX_LOOP_DECLARATION.md for physical repeatability status.")
     # 4. HEAD-TO-HEAD VS INCUMBENT APP (Polycam Benchmark)
     # -------------------------------------------------------------
     print("\n[4/4] Generating Head-to-Head Benchmark Table vs Incumbent App (Polycam v3.4.2)...")

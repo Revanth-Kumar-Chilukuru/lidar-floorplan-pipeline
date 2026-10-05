@@ -1,0 +1,610 @@
+{
+  "property_id": "c7d28f72c6",
+  "capture_tier": "lidar",
+  "total_floor_area": {
+    "value": 71.01,
+    "ci_lower": 69.95,
+    "ci_upper": 72.08,
+    "unit": "m2",
+    "is_prior": false
+  },
+  "rooms": [
+    {
+      "room_id": "room_1",
+      "room_name": "Primary Room",
+      "ceiling_height": {
+        "value": 2.3719,
+        "ci_lower": 2.36,
+        "ci_upper": 2.384,
+        "unit": "m",
+        "is_prior": false
+      },
+      "floor_area": {
+        "value": 71.012,
+        "ci_lower": 69.947,
+        "ci_upper": 72.077,
+        "unit": "m2",
+        "is_prior": false
+      },
+      "perimeter": 47.912,
+      "polygon_vertices": [
+        [
+          1.458,
+          -4.6
+        ],
+        [
+          -1.26,
+          1.218
+        ],
+        [
+          -3.076,
+          1.609
+        ],
+        [
+          -2.525,
+          4.578
+        ],
+        [
+          -5.303,
+          7.773
+        ],
+        [
+          -1.848,
+          9.566
+        ],
+        [
+          0.737,
+          6.18
+        ],
+        [
+          4.939,
+          9.516
+        ],
+        [
+          7.63,
+          4.338
+        ],
+        [
+          4.365,
+          2.11
+        ],
+        [
+          2.609,
+          1.97
+        ],
+        [
+          0.455,
+          -1.823
+        ]
+      ],
+      "walls": [
+        {
+          "id": "wall_1",
+          "start_point": [
+            1.458,
+            -4.6
+          ],
+          "end_point": [
+            -1.26,
+            1.218
+          ],
+          "length": {
+            "value": 6.421,
+            "ci_lower": 6.389,
+            "ci_upper": 6.453,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_2",
+          "start_point": [
+            -1.26,
+            1.218
+          ],
+          "end_point": [
+            -3.076,
+            1.609
+          ],
+          "length": {
+            "value": 1.858,
+            "ci_lower": 1.848,
+            "ci_upper": 1.868,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [
+            {
+              "id": "door_wall_2_1",
+              "type": "door",
+              "wall_id": "wall_2",
+              "width": {
+                "value": 0.853,
+                "ci_lower": 0.838,
+                "ci_upper": 0.868,
+                "unit": "m",
+                "is_prior": false
+              },
+              "height": {
+                "value": null,
+                "ci_lower": null,
+                "ci_upper": null,
+                "unit": "m",
+                "is_prior": true
+              },
+              "sill_height": 0.0,
+              "position_along_wall": 0.879
+            }
+          ],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_3",
+          "start_point": [
+            -3.076,
+            1.609
+          ],
+          "end_point": [
+            -2.525,
+            4.578
+          ],
+          "length": {
+            "value": 3.019,
+            "ci_lower": 3.004,
+            "ci_upper": 3.034,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_4",
+          "start_point": [
+            -2.525,
+            4.578
+          ],
+          "end_point": [
+            -5.303,
+            7.773
+          ],
+          "length": {
+            "value": 4.234,
+            "ci_lower": 4.213,
+            "ci_upper": 4.255,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_5",
+          "start_point": [
+            -5.303,
+            7.773
+          ],
+          "end_point": [
+            -1.848,
+            9.566
+          ],
+          "length": {
+            "value": 3.892,
+            "ci_lower": 3.873,
+            "ci_upper": 3.911,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_6",
+          "start_point": [
+            -1.848,
+            9.566
+          ],
+          "end_point": [
+            0.737,
+            6.18
+          ],
+          "length": {
+            "value": 4.26,
+            "ci_lower": 4.239,
+            "ci_upper": 4.281,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [
+            {
+              "id": "door_wall_6_2",
+              "type": "door",
+              "wall_id": "wall_6",
+              "width": {
+                "value": 1.153,
+                "ci_lower": 1.138,
+                "ci_upper": 1.168,
+                "unit": "m",
+                "is_prior": false
+              },
+              "height": {
+                "value": null,
+                "ci_lower": null,
+                "ci_upper": null,
+                "unit": "m",
+                "is_prior": true
+              },
+              "sill_height": 0.0,
+              "position_along_wall": 3.684
+            }
+          ],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_7",
+          "start_point": [
+            0.737,
+            6.18
+          ],
+          "end_point": [
+            4.939,
+            9.516
+          ],
+          "length": {
+            "value": 5.365,
+            "ci_lower": 5.338,
+            "ci_upper": 5.392,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_8",
+          "start_point": [
+            4.939,
+            9.516
+          ],
+          "end_point": [
+            7.63,
+            4.338
+          ],
+          "length": {
+            "value": 5.836,
+            "ci_lower": 5.807,
+            "ci_upper": 5.865,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_9",
+          "start_point": [
+            7.63,
+            4.338
+          ],
+          "end_point": [
+            4.365,
+            2.11
+          ],
+          "length": {
+            "value": 3.952,
+            "ci_lower": 3.932,
+            "ci_upper": 3.972,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_10",
+          "start_point": [
+            4.365,
+            2.11
+          ],
+          "end_point": [
+            2.609,
+            1.97
+          ],
+          "length": {
+            "value": 1.762,
+            "ci_lower": 1.752,
+            "ci_upper": 1.772,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [
+            {
+              "id": "door_wall_10_3",
+              "type": "door",
+              "wall_id": "wall_10",
+              "width": {
+                "value": 0.755,
+                "ci_lower": 0.74,
+                "ci_upper": 0.77,
+                "unit": "m",
+                "is_prior": false
+              },
+              "height": {
+                "value": null,
+                "ci_lower": null,
+                "ci_upper": null,
+                "unit": "m",
+                "is_prior": true
+              },
+              "sill_height": 0.0,
+              "position_along_wall": 0.78
+            }
+          ],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_11",
+          "start_point": [
+            2.609,
+            1.97
+          ],
+          "end_point": [
+            0.455,
+            -1.823
+          ],
+          "length": {
+            "value": 4.362,
+            "ci_lower": 4.34,
+            "ci_upper": 4.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_12",
+          "start_point": [
+            0.455,
+            -1.823
+          ],
+          "end_point": [
+            1.458,
+            -4.6
+          ],
+          "length": {
+            "value": 2.952,
+            "ci_lower": 2.937,
+            "ci_upper": 2.967,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 2.3719,
+            "ci_lower": 2.36,
+            "ci_upper": 2.384,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [
+            {
+              "id": "door_wall_12_4",
+              "type": "door",
+              "wall_id": "wall_12",
+              "width": {
+                "value": 0.851,
+                "ci_lower": 0.836,
+                "ci_upper": 0.866,
+                "unit": "m",
+                "is_prior": false
+              },
+              "height": {
+                "value": null,
+                "ci_lower": null,
+                "ci_upper": null,
+                "unit": "m",
+                "is_prior": true
+              },
+              "sill_height": 0.0,
+              "position_along_wall": 0.425
+            }
+          ],
+          "adjacent_room_id": null
+        }
+      ],
+      "damage_regions": [
+        {
+          "id": "dmg_room_1_1",
+          "surface_type": "ceiling",
+          "surface_id": null,
+          "damage_class": "water_stain",
+          "metric_extent": {
+            "length_m": 0.85,
+            "width_m": 0.6,
+            "area_m2": 0.51
+          },
+          "confidence": 0.94,
+          "severity": "severe",
+          "bounding_box_2d": [
+            0.5,
+            3.2,
+            1.35,
+            3.8
+          ]
+        },
+        {
+          "id": "dmg_room_1_2",
+          "surface_type": "wall",
+          "surface_id": "wall_1",
+          "damage_class": "drywall_crack",
+          "metric_extent": {
+            "length_m": 1.25,
+            "width_m": 0.05,
+            "area_m2": 0.06
+          },
+          "confidence": 0.89,
+          "severity": "moderate",
+          "bounding_box_2d": [
+            1.458,
+            -4.6,
+            1.758,
+            -3.3499999999999996
+          ]
+        }
+      ]
+    }
+  ],
+  "room_adjacencies": [],
+  "concealed_damage_flags": [
+    {
+      "rule_id": "RULE-CEIL-MOIST-01",
+      "rule_name": "Ceiling Moisture Concealed Hazard Rule",
+      "trigger_damage_id": "dmg_room_1_1",
+      "surface_id": null,
+      "suspected_cause": "Concealed overhead plumbing rupture, drain trap leakage, or roof flashing failure",
+      "recommended_action": "Cut exploratory 30x30cm inspection aperture, inspect joist cavity with non-invasive moisture meter, check HVAC drain pan",
+      "urgency": "high"
+    },
+    {
+      "rule_id": "RULE-WALL-DRYWALL-CRACK-02",
+      "rule_name": "Structural Shear / Door Header Settlement Rule",
+      "trigger_damage_id": "dmg_room_1_2",
+      "surface_id": "wall_1",
+      "suspected_cause": "Differential foundation settling or header deflection above portal opening",
+      "recommended_action": "Check foundation exterior perimeter for step cracking; monitor crack gauge across 30 days",
+      "urgency": "medium"
+    }
+  ],
+  "scope_of_work": [
+    {
+      "item_id": "SCOPE-001",
+      "category": "drywall",
+      "description": "Remove moisture-damaged ceiling drywall, discard wet insulation, install 5/8' Type-X gypsum board (1.5 m²)",
+      "surface_id": "ceiling_room_1",
+      "quantity": 1.5,
+      "unit": "sq_m",
+      "estimated_cost_tier": "standard"
+    },
+    {
+      "item_id": "SCOPE-002",
+      "category": "painting",
+      "description": "Apply stain-blocking acoustic primer and repaint ceiling entire expanse to match sheen (71.01 m²)",
+      "surface_id": "ceiling_room_1",
+      "quantity": 71.01,
+      "unit": "sq_m",
+      "estimated_cost_tier": "standard"
+    },
+    {
+      "item_id": "SCOPE-003",
+      "category": "drywall",
+      "description": "V-groove tape and bed settlement crack with mesh joint tape and 3-coat compound finish (1.25 lin m)",
+      "surface_id": "wall_1",
+      "quantity": 1.25,
+      "unit": "linear_m",
+      "estimated_cost_tier": "minor"
+    },
+    {
+      "item_id": "SCOPE-004",
+      "category": "inspection",
+      "description": "Plumbing pressure leak diagnostic test & bore scope cavity inspection (RULE-CEIL-MOIST-01)",
+      "surface_id": null,
+      "quantity": 1.0,
+      "unit": "each",
+      "estimated_cost_tier": "standard"
+    }
+  ],
+  "drift_metrics": {
+    "total_path_length_m": 98.246,
+    "loop_closure_residual_m": 0.3802,
+    "drift_correction_enabled": true,
+    "raw_point_count": 17390043,
+    "downsampled_point_count": 859767
+  },
+  "metadata": {
+    "room_count": 1,
+    "total_walls": 12,
+    "total_openings": 4,
+    "damages_detected": 2,
+    "concealed_hazards": 2,
+    "scope_items_count": 4
+  }
+}

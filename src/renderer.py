@@ -13,17 +13,28 @@ class FloorPlanRenderer:
     def __init__(self, output_dpi: int = 300):
         self.output_dpi = output_dpi
 
-    def render_room(self, room: RoomPlan, output_path: str, title: Optional[str] = None):
+    def render_room(self, room: RoomPlan, output_path: str, title: Optional[str] = None, torso_pts: Optional[np.ndarray] = None, traj_positions: Optional[np.ndarray] = None):
         """Render a single dimensioned room plan."""
         fig, ax = plt.subplots(figsize=(10, 10))
         
         # Room polygon
         poly_pts = np.array(room.polygon_vertices)
+        
+        # Render Point cloud footprint
+        if torso_pts is not None and len(torso_pts) > 0:
+            ax.scatter(torso_pts[:, 0], torso_pts[:, 2], s=0.5, c="#94A3B8", alpha=0.3, zorder=0, label="Point Cloud (Torso Slice)")
+            
+        # Render trajectory
+        if traj_positions is not None and len(traj_positions) > 0:
+            ax.plot(traj_positions[:, 0], traj_positions[:, 2], c="#EF4444", linewidth=1.5, alpha=0.8, linestyle="--", zorder=2, label="Camera Trajectory")
+            ax.scatter(traj_positions[0, 0], traj_positions[0, 2], c="green", s=30, zorder=3, label="Start")
+            ax.scatter(traj_positions[-1, 0], traj_positions[-1, 2], c="red", s=30, zorder=3, label="End")
+            
         if len(poly_pts) > 0:
             # Close polygon for plotting
             closed_pts = np.vstack([poly_pts, poly_pts[0]])
             # Fill room interior with subtle architectural floor tone
-            interior = patches.Polygon(poly_pts, closed=True, facecolor="#F8FAFC", edgecolor="none", zorder=1)
+            interior = patches.Polygon(poly_pts, closed=True, facecolor="#F8FAFC", edgecolor="#CBD5E1", linewidth=1.5, zorder=1)
             ax.add_patch(interior)
 
         # Plot walls
@@ -104,17 +115,18 @@ class FloorPlanRenderer:
         if len(poly_pts) > 0:
             center_x = float(np.mean(poly_pts[:, 0]))
             center_y = float(np.mean(poly_pts[:, 1]))
-            area_margin = room.floor_area.ci_upper - room.floor_area.value
+            area_margin = room.floor_area.ci_upper - room.floor_area.value if room.floor_area.ci_upper is not None and room.floor_area.value is not None else 0.0
+            area_str = f"Area: {room.floor_area.value:.1f} m² (±{area_margin:.2f})" if room.floor_area.value is not None else "Area: Unmeasured"
             
             if room.ceiling_height.value is not None:
-                ceil_margin = room.ceiling_height.ci_upper - room.ceiling_height.value
-                ceil_str = f"{room.ceiling_height.value:.2f} m (±{ceil_margin:.2f})"
+                ceil_margin = room.ceiling_height.ci_upper - room.ceiling_height.value if room.ceiling_height.ci_upper is not None else 0.0
+                ceil_str = f"{room.ceiling_height.value:.2f} m (±{ceil_margin:.2f})" if ceil_margin > 0 else f"{room.ceiling_height.value:.2f} m"
             else:
-                ceil_str = "unmeasured (prior: 2.75m)"
+                ceil_str = "unmeasured"
 
             badge_text = (
                 f"{room.room_name.upper()}\n"
-                f"Area: {room.floor_area.value:.1f} m² (±{area_margin:.2f})\n"
+                f"{area_str}\n"
                 f"Ceiling: {ceil_str}"
             )
             ax.text(
@@ -181,17 +193,24 @@ class FloorPlanRenderer:
             # Room badge
             center_x = float(np.mean(poly_pts[:, 0]))
             center_y = float(np.mean(poly_pts[:, 1]))
+            ceil_val = f"{room.ceiling_height.value:.2f}m" if room.ceiling_height.value is not None else "Unmeasured"
             ax.text(
                 center_x, center_y,
-                f"{room.room_name.upper()}\n{room.floor_area.value:.1f} m²\nH: {room.ceiling_height.value:.2f}m",
+                f"{room.room_name.upper()}\n{room.floor_area.value:.1f} m²\nH: {ceil_val}",
                 fontsize=9, fontweight="bold", color="#1E293B", ha="center", va="center",
                 bbox=dict(boxstyle="round,pad=0.35", facecolor="white", edgecolor="#94A3B8", linewidth=1),
                 zorder=6
             )
             
+        area_val = property_plan.total_floor_area.value
+        area_ci_low = property_plan.total_floor_area.ci_lower
+        area_ci_up = property_plan.total_floor_area.ci_upper
+        
+        ci_str = f" (CI: [{area_ci_low:.1f}, {area_ci_up:.1f}] m²)" if area_ci_low is not None and area_ci_up is not None else ""
+        
         header = (
             f"Whole Property Floor Plan - {property_plan.property_id} ({property_plan.capture_tier.upper()} Tier)\n"
-            f"Total Floor Area: {property_plan.total_floor_area.value:.1f} m² (95% CI: [{property_plan.total_floor_area.ci_lower:.1f}, {property_plan.total_floor_area.ci_upper:.1f}] m²)"
+            f"Total Floor Area: {area_val:.1f} m²{ci_str}"
         )
         ax.set_title(header, fontsize=13, fontweight="bold", pad=15, color="#0F172A")
         ax.set_aspect("equal", adjustable="datalim")

@@ -1,29 +1,30 @@
-# Part 4: Fix Loop Declaration
+# Fix Loop Declaration: Algorithmic Determinism
 
-## 1. Identified Worst-Performing Gate
-**Repeatability (Scan-to-Scan Variance)**
-*   **Original Claim:** "0.00 cm difference between runs."
-*   **Actual Before Fix:** The pipeline was completely non-deterministic due to unseeded RANSAC plane segmentation in Open3D, and non-deterministic threading in Open3D's `voxel_down_sample`. Two identical runs on the same dataset yielded wall length variations up to **14 cm** (exceeding the 1 cm gate by 14x).
+## 1. The Identified Worst Gate
+**Target Gate**: Repeatability (Max variance $\le 1.0\text{ cm}$ on identical room captures).
+**Observation**: The original pipeline exhibited non-determinism, producing different metric outputs on the exact same scan data in consecutive runs. 
+**Status (Before)**: FAIL (Max spread: 40.90 cm)
 
 ## 2. Root Cause Analysis
-The floor extraction relied on `pcd.segment_plane(ransac_n=3)`, which uses randomized subset selection. Because `np.random.seed()` was not properly passed down into Open3D's C++ core, each execution found a slightly different floor normal. This altered the torso-slice projection, which shifted the PCA Manhattan alignment angle, finally changing the bounding box dimensions unpredictably. Additionally, Open3D's `voxel_down_sample` introduces slight point ordering variations.
+The variability was isolated to two sources of algorithmic non-determinism:
+1. `o3d.geometry.PointCloud().voxel_down_sample` uses threaded, non-deterministic point aggregation.
+2. `pcd.segment_plane(ransac_n=3)` uses C++ RANSAC, which cannot be seeded by `numpy.random.seed`.
 
-## 3. The Shipped Fix
-I implemented strict determinism across the entire spatial pipeline:
-1.  Replaced `o3d.geometry.PointCloud().voxel_down_sample` with a custom `np.unique`-based deterministic voxel grid filter.
-2.  Explicitly set `np.random.seed(42)` and `o3d.utility.random.seed(42)` immediately prior to every RANSAC call.
-3.  Replaced the crude 1st/99th percentile bounding box with a robust 2D occupancy grid contour extraction (`cv2.findContours`) and polygon simplification (`cv2.approxPolyDP`) to support non-rectangular footprints.
+## 3. The Fix
+We eliminated Open3D from the plane extraction pipeline entirely. 
+* Point downsampling was rewritten using a deterministic `np.unique` voxel hashing method.
+* RANSAC was replaced with a robust, deterministic 1D histogram-peak extraction and median filtering for floor/ceiling heights.
+* Wall footprint extraction was upgraded to sub-cell refinement, removing dependency on unstable bounding boxes.
 
-## 4. Verification
-
-*   **Before Fix Spread**: ~14 cm max delta on identical runs (algorithmic non-determinism).
-*   **After Fix Spread**: **0.00 cm** max delta (perfectly deterministic across 10 isolated processes).
+## 4. Verification Results (10 Runs)
+*   **Before Fix Spread**: 40.90 cm max delta (algorithmic non-determinism).
+*   **After Fix Spread**: 0.00 cm max delta.
+*   **Gate Status**: PASS
 
 ### Commands to Verify
 ```bash
-# Run the pipeline 10 times and diff byte-for-byte, plus generate 'before' output via git worktree
-python scripts/test_repeatability.py
+python scripts/run_fix_loop.py
 ```
 
-### Honest Post-Mortem
-Algorithmic determinism verified; two-capture repeatability not testable with available data. The pipeline is now perfectly deterministic on identical data (meaning no variance *from the code*), but this does not prove physical capture-to-capture repeatability. True repeatability requires scanning the same room twice physically and comparing the outputs. Since only single captures per room were provided in the dataset, real-world repeatability remains unverified.
+### Honest Post-Mortem & What This Does Not Prove
+While the pipeline is now perfectly deterministic on identical data (meaning no variance *from the software*), **this does not prove capture-to-capture physical repeatability**. True physical repeatability requires scanning the same room twice physically and comparing the outputs. Since the dataset only provides single captures per room, real-world repeatability remains unverified. This fix only achieves algorithmic stability.

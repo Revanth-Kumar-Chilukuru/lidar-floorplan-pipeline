@@ -70,6 +70,9 @@ def main():
     drift_metrics = {}
     
     if args.tier == "lidar":
+        import time
+        t0 = time.time()
+        print(f"[{time.strftime('%H:%M:%S')}] Processing LiDAR scan: {args.input}...")
         pipeline = LidarReconstructionPipeline()
         room_plan, metrics = pipeline.process_scan(
             args.input,
@@ -77,7 +80,10 @@ def main():
             room_name=args.room_name,
             drift_correction=not args.disable_drift_correction
         )
+        t1 = time.time()
+        print(f"[{time.strftime('%H:%M:%S')}] Processing complete in {t1 - t0:.2f} seconds.")
         rooms.append(room_plan)
+        raw_metrics = metrics
         drift_metrics = metrics.get("drift_stats", {})
         
     elif args.tier == "video":
@@ -122,7 +128,16 @@ def main():
         
     # 2. Render Architectural Floor Plan
     render_path = os.path.join(args.output_dir, f"{property_id}_{args.tier}_render.png")
-    renderer.render_room(primary_room, render_path, title=f"{args.room_name} ({args.tier.upper()} Tier)")
+    if args.tier == "lidar":
+        # Pass trajectory and point cloud for lidar sanity check overlay
+        renderer.render_room(
+            primary_room, render_path, 
+            title=f"{args.room_name} ({args.tier.upper()} Tier)",
+            torso_pts=raw_metrics.get("torso_pts") if 'raw_metrics' in locals() else None,
+            traj_positions=raw_metrics.get("traj_positions") if 'raw_metrics' in locals() else None
+        )
+    else:
+        renderer.render_room(primary_room, render_path, title=f"{args.room_name} ({args.tier.upper()} Tier)")
     
     # Print Executive Summary Table
     table = Table(title="Pipeline Execution Results", show_lines=True)

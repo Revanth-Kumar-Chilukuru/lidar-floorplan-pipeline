@@ -374,37 +374,44 @@ class LidarReconstructionPipeline:
             max_door_width = 1.20
             
             gap_start = None
+            
+            def process_gap(g_start, g_end):
+                gap_w = g_end - g_start
+                if min_door_width <= gap_w <= max_door_width:
+                    door_center = (g_start + g_end) / 2.0
+                    openings.append(Opening(
+                        id=f"door_{wall['id']}_{len(openings)+1}",
+                        type="door",
+                        wall_id=wall["id"],
+                        width=ConfidenceInterval(
+                            value=round(float(gap_w), 3),
+                            ci_lower=round(float(gap_w - 0.015), 3),
+                            ci_upper=round(float(gap_w + 0.015), 3),
+                            unit="m"
+                        ),
+                        height=ConfidenceInterval(
+                            value=None,
+                            ci_lower=None,
+                            ci_upper=None,
+                            unit="m",
+                            is_prior=True
+                        ),
+                        sill_height=0.0,
+                        position_along_wall=round(float(door_center), 3)
+                    ))
+            
             for b_idx, count in enumerate(counts):
                 if count <= 1: # sparse/gap bin
                     if gap_start is None:
                         gap_start = edges[b_idx]
                 else:
                     if gap_start is not None:
-                        gap_end = edges[b_idx]
-                        gap_w = gap_end - gap_start
-                        if min_door_width <= gap_w <= max_door_width:
-                            # Valid door opening found
-                            door_center = (gap_start + gap_end) / 2.0
-                            openings.append(Opening(
-                                id=f"door_{wall['id']}_{len(openings)+1}",
-                                type="door",
-                                wall_id=wall["id"],
-                                width=ConfidenceInterval(
-                                    value=round(float(gap_w), 3),
-                                    ci_lower=round(float(gap_w - 0.015), 3), # ±1.5cm calibrated
-                                    ci_upper=round(float(gap_w + 0.015), 3),
-                                    unit="m"
-                                ),
-                                height=ConfidenceInterval(
-                                    value=2.05,
-                                    ci_lower=2.03,
-                                    ci_upper=2.08,
-                                    unit="m"
-                                ),
-                                sill_height=0.0,
-                                position_along_wall=round(float(door_center), 3)
-                            ))
+                        process_gap(gap_start, edges[b_idx])
                         gap_start = None
+                        
+            # Handle gap reaching wall end
+            if gap_start is not None:
+                process_gap(gap_start, edges[-1])
                         
         return openings
 
@@ -482,9 +489,11 @@ class LidarReconstructionPipeline:
         extra_metrics = {
             "drift_stats": drift_stats,
             "y_floor": round(y_floor, 3),
-            "y_ceil": round(y_ceil, 3),
+            "y_ceil": round(y_ceil, 3) if y_ceil is not None else None,
             "point_count": len(pts),
-            "openings_detected": len(openings)
+            "openings_detected": len(openings),
+            "torso_pts": torso_pts,
+            "traj_positions": traj
         }
         
         return room_plan, extra_metrics
