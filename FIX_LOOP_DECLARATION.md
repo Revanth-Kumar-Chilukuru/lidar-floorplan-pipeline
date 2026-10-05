@@ -16,14 +16,14 @@ I implemented strict determinism across the entire spatial pipeline:
 
 ## 4. Verification
 
-*   **Before Fix Spread**: ~14.2 cm max delta on identical runs.
-*   **After Fix Spread**: **0.00 cm** max delta (perfectly deterministic).
+*   **Before Fix Spread**: ~14 cm max delta on identical runs (algorithmic non-determinism).
+*   **After Fix Spread**: **0.00 cm** max delta (perfectly deterministic across 10 isolated processes).
 
 ### Commands to Verify
 ```bash
-# Run the pipeline (outputs are perfectly repeatable)
-python scripts/run_benchmarks_and_fixloop.py
+# Run the pipeline 10 times and diff byte-for-byte, plus generate 'before' output via git worktree
+python scripts/test_repeatability.py
 ```
 
 ### Honest Post-Mortem
-While the pipeline is now perfectly deterministic on identical data (meaning no variance *from the code*), this **does not prove capture-to-capture repeatability**. True repeatability requires scanning the same room twice physically and comparing the outputs. Since only single captures per room were provided in the dataset, real-world repeatability remains unverified.
+Algorithmic determinism verified; two-capture repeatability not testable with available data. The pipeline is now perfectly deterministic on identical data (meaning no variance *from the code*), but this does not prove physical capture-to-capture repeatability. True repeatability requires scanning the same room twice physically and comparing the outputs. Since only single captures per room were provided in the dataset, real-world repeatability remains unverified.
