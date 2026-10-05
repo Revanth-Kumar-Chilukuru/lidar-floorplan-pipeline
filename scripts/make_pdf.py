@@ -52,8 +52,8 @@ li {{ margin-bottom: 2px; }}
         f.write(full_html)
 
     edge_paths = [
-        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+        os.path.join(os.environ.get("PROGRAMFILES(X86)", "C:/Program Files (x86)"), "Microsoft", "Edge", "Application", "msedge.exe"),
+        os.path.join(os.environ.get("PROGRAMFILES", "C:/Program Files"), "Microsoft", "Edge", "Application", "msedge.exe")
     ]
     edge_exe = next((p for p in edge_paths if os.path.exists(p)), None)
     if not edge_exe:
