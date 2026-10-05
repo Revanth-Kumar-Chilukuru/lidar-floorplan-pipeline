@@ -1,5 +1,10 @@
 # Property Capture & Reconstruction Pipeline
 
+**Author:** Revanth Kumar Chilukuru
+
+## Process
+Built with AI coding assistance; see Technical Report section 7 for the development and remediation history.
+
 An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans, identifies visible surface damage, applies rule-based concealed insurance damage inferences, and compiles repair scopes of work.
 
 ## 🚀 Quickstart

@@ -1,3 +1,6 @@
+"""
+Author: Revanth Kumar Chilukuru
+"""
 import sys, os, numpy as np, cv2
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.lidar_pipeline import LidarReconstructionPipeline

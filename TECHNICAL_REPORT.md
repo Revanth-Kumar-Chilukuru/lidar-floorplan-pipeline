@@ -1,6 +1,6 @@
 # Technical Report: End-to-End Property Capture, Reconstruction, and Insurance Damage Assessment Pipeline
 
-**Author:** Antigravity Engineering Candidate  
+**Author:** Revanth Kumar Chilukuru  
 **Target:** Founding Backend AI Engineer Take-Home  
 
 ---
