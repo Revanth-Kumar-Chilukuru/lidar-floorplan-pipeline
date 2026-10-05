@@ -14,7 +14,7 @@ def run_command(cmd, desc):
     if res.returncode != 0:
         print(f"X Failed with exit code {res.returncode}")
         sys.exit(res.returncode)
-    print(f"✓ Completed in {elapsed:.2f} seconds")
+    print(f"OK Completed in {elapsed:.2f} seconds")
 
 def main():
     print("******************************************************************")
