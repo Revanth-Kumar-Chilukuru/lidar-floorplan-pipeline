@@ -250,14 +250,17 @@ class LidarReconstructionPipeline:
         grid[v[valid], u[valid]] = 255
         
         # Connect sparse points into continuous walls
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
-        grid = cv2.morphologyEx(grid, cv2.MORPH_CLOSE, kernel, iterations=2)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 35))
+        grid = cv2.morphologyEx(grid, cv2.MORPH_CLOSE, kernel, iterations=1)
         grid = cv2.dilate(grid, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
         
         contours, _ = cv2.findContours(grid, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if contours:
             largest_contour = max(contours, key=cv2.contourArea)
+            # Use convex hull to ensure all internal trajectory areas are bounded
+            largest_contour = cv2.convexHull(largest_contour)
+            
             # Simplify contour to polygons
             peri = cv2.arcLength(largest_contour, True)
             # Reduce epsilon to 0.015 for tighter boundary

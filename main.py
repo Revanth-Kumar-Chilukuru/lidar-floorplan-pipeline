@@ -86,17 +86,27 @@ def main():
         raw_metrics = metrics
         drift_metrics = metrics.get("drift_stats", {})
         
-    elif args.tier == "video":
-        pipeline = VideoReconstructionPipeline()
-        room_plan = pipeline.process_video(args.input, room_id="room_1", room_name=args.room_name)
-        rooms.append(room_plan)
-        drift_metrics = {"tier": "video", "optical_flow_tracking": True}
+    elif args.tier in ["video", "photos"]:
+        msg = f"Tier {args.tier.upper()} is not implemented."
+        reason = "A robust monocular pipeline requires advanced models (Optical Flow/SLAM, DepthAnythingV2) which lack reliable CPU fallbacks within the time constraints."
+        required = "GPU-accelerated monocular depth and pose-graph optimization."
+        data_needed = "RGB frames and matched timestamp metadata."
         
-    elif args.tier == "photos":
-        pipeline = PhotoReconstructionPipeline()
-        room_plan = pipeline.estimate_room_from_photos(args.input, room_id="room_1", room_name=args.room_name)
-        rooms.append(room_plan)
-        drift_metrics = {"tier": "photos", "vanishing_point_alignment": True}
+        output_json = {
+            "status": "not_implemented",
+            "tier": args.tier,
+            "reason": reason,
+            "required_components": required,
+            "data_requirements": data_needed
+        }
+        
+        print(f"\n[!] {msg}\n    Reason: {reason}\n    Required: {required}")
+        out_path = os.path.join(args.output_dir, f"{property_id}_{args.tier}_plan.json")
+        os.makedirs(args.output_dir, exist_ok=True)
+        import json
+        with open(out_path, 'w') as f:
+            json.dump(output_json, f, indent=2)
+        sys.exit(0)
         
     # Damage Detection and Assessment
     primary_room = rooms[0]

@@ -35,8 +35,14 @@ def main():
         "Running Tier 3 LiDAR Scan on Multi-Room with Ceiling"
     )
     
-    # 3. Skipped video tier walkthrough
-    print("Skipping Tier 2 Video and Tier 1 Photo as they are honestly reported as Not Implemented.")
+    # 3. Run scan floor only
+    run_command(
+        f'"{python_bin}" main.py --input "data/sample_subset/single_scan_floor_only/1a8384c3f6" --tier lidar --output-dir results',
+        "Running Tier 3 LiDAR Scan on Floor-Only Capture"
+    )
+    
+    # 4. Skipped video tier walkthrough
+    print("\nSkipping Tier 2 Video and Tier 1 Photo as they are honestly reported as Not Implemented.")
     
     # 4. Run benchmarks and Fix Loop before/after runs
     run_command(

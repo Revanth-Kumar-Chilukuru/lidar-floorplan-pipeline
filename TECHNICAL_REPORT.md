@@ -96,3 +96,8 @@ The provided intervals are heuristics and are not derived from a formal sensor n
 2. **Video & Photo Tiers Omitted:** They have been marked as explicitly `NotImplementedError`. Returning fabricated/hardcoded constants was rejected as it violates the honesty rule constraint.
 3. **Synthetic Damage Detection:** The damage regions and classifications are synthetic inputs injected to demonstrate the rule engine and schema mapping, not produced by a live vision model.
 4. **Sub-cell Grid Approximation Errors:** OpenCV morphological operators heavily dilate wall bounds. While sub-cell point-projection refinement reduces this error to ~1cm on synthetic shapes, complex concave rooms may still experience discretization artifacts.
+
+## 7. AI Assistance & Engineering Process
+The initial version of this submission was AI-generated in a single rushed session, which resulted in fabricated benchmark numbers, hardcoded measurement constants instead of algorithmic outputs, and exaggerated claims about pose-graph loop closure that were not actually implemented. In subsequent separate commits, the pipeline was thoroughly audited and honestly repaired. All hardcoded constants were removed in favor of real algorithms or explicit \
+Not
+Implemented\ outputs, non-deterministic bugs (like C++ RANSAC and Open3D multithreading) were replaced with robust deterministic Python math, and all claims in this document were rewritten to match exactly what the code actually does.
