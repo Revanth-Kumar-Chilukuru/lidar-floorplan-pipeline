@@ -1,20 +1,17 @@
-# 3D Property Capture to Dimensioned Floor Plan & Insurance Assessment Pipeline
+# Property Capture & Reconstruction Pipeline
 
-An end-to-end computer vision and spatial AI pipeline that transforms smartphone property captures (LiDAR, handheld video, or still photos) into dimensioned architectural floor plans, detects visible surface damage, flags concealed structural/plumbing risks, and generates repair scopes of work.
+An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans, identifies visible surface damage, applies rule-based concealed insurance damage inferences, and compiles repair scopes of work.
 
----
-
-## 🚀 Quickstart: Setup to Cold Run in Under 10 Minutes
+## 🚀 Quickstart
 
 ### Prerequisites
 * Python 3.11
 * [uv](https://github.com/astral-sh/uv) (recommended) or standard `pip`
 * Windows, Linux, or macOS
 
-### 1. Environment Setup (1 Command)
+### 1. Environment Setup
 ```bash
-# Clone the repository
-git clone <repo-url>
+git clone <this-repo>
 cd AI_Assignment_YC
 
 # Create environment and install dependencies via uv
@@ -22,52 +19,34 @@ uv venv --python 3.11
 uv pip install -r requirements.txt
 ```
 
-*(Or via standard python pip)*:
+### 2. Reproduction Bundle
+Execute all project deliverables in one command. This will process the tracked data subset and output JSON plans, PNG renders, and benchmarks to the `results/` folder:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+python scripts/reproduce_all.py
+```
+
+### 3. Real Fix Loop (Algorithmic Determinism)
+Validate the fix for the algorithmic non-determinism issue (Before/After comparison across 10 runs using git worktrees):
+```bash
+python scripts/run_fix_loop.py
 ```
 
 ---
 
-## 🏃 Running the Pipeline (One Command per Capture)
+## What is Implemented
+- **Tier 3 (LiDAR):** Processes ARKit depth maps and odometry into dimensioned floor plans.
+- **Deterministic Geometry Extraction:** Uses median/histogram peaks and deterministic voxel grid hashing (Open3D dependency removed).
+- **Sub-cell Wall Refinement:** Contour projection maps wall segments back to the raw point median for centimeter-accurate synthetic bounds.
+- **Null-safe Properties:** Ceilings strictly output as unmeasured (`None`) when insufficient data is available.
 
-### Tier 3: LiDAR Scan (Stray Scanner Export)
-```bash
-python main.py --input "Assignment - YC Startup/single_scan_with_ceiling/c7d28f72c6" --tier lidar
-```
-* Generates validated JSON: `outputs/c7d28f72c6_lidar_plan.json`
-* Generates 300 DPI floor plan: `outputs/c7d28f72c6_lidar_render.png`
+## What is NOT Implemented (Honesty Statement)
+- **Tier 1 (Photos) and Tier 2 (Video):** Not implemented. They explicitly fail with `NotImplementedError` rather than returning fabricated bounds.
+- **True Loop Closure:** Drift is "corrected" only via a post-hoc PCA Manhattan orientation rotation on the 2D footprint, not via pose-graph adjustment.
+- **Live Damage Vision Model:** Damage events are synthetic seeds injected to demonstrate the downstream insurance rule engine.
+- **iOS Capture App:** The author does not own an iPhone. All tests are run on the provided Stray Scanner sample data.
 
-### Tier 2 & 1: Video and Photo
-> **Note:** The Video and Photo tiers are currently not implemented in the software pipeline due to hardware/compute constraints. They would require standard RGB video or HEIC photos captured from the native iOS Camera app.
-
----
-
-## 📊 Reproducing All Benchmarks & Fix Loop (Deliverable 4 & 6)
-
-To regenerate every reported benchmark number, gate verification, repeatability evaluation, and the Fix Loop before/after runs:
-
-```bash
-python scripts/run_benchmarks_and_fixloop.py
-```
-
-Outputs will be stored in:
-* `outputs/benchmark/benchmark_results.json`
-* `outputs/fix_loop/before/` (Raw poses as-is)
-* `outputs/fix_loop/after/` (Shipped fix with Manhattan plane-anchoring)
-
----
-
-## 📑 Repository Structure & Deliverables
-
-* [`COMPLIANCE_MATRIX.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/COMPLIANCE_MATRIX.md): Detailed requirement $\to$ file path $\to$ artifact mapping.
-* [`STOCK_CAPTURE_PROTOCOL.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/STOCK_CAPTURE_PROTOCOL.md): 1-page operator guide for non-engineers using Stray Scanner.
-* [`BENCHMARK_REPORT.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/BENCHMARK_REPORT.md): Gate evaluation across all 3 tiers, repeatability, and Polycam head-to-head table.
-* [`FIX_LOOP_DECLARATION.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/FIX_LOOP_DECLARATION.md): Part 4 declaration of worst-performing gate, root cause, shipped fix, and before/after verification.
-* [`TECHNICAL_REPORT.md`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/TECHNICAL_REPORT.md): 6-page engineering whitepaper covering architecture, drift handling, error budget, calibration, and edge cases.
-* [`src/schema.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/schema.py): Pydantic data contract with calibrated confidence intervals.
-* [`src/lidar_pipeline.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/lidar_pipeline.py): 3D backprojection, RANSAC plane segmentation, drift correction, opening extraction.
-* [`src/renderer.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/renderer.py): High-resolution vector floor plan renderer.
-* [`src/damage_engine.py`](file:///c:/Users/chrev/OneDrive/Desktop/AI_Assignment_YC/src/damage_engine.py): Surface damage detection, concealed damage rule engine, and repair scope generator.
+## Documentation
+* `TECHNICAL_REPORT.md` - Honest architectural analysis and algorithms.
+* `FIX_LOOP_DECLARATION.md` - Before/after metrics for the determinism fix.
+* `COMPLIANCE_MATRIX.md` - Status tracking against the prompt constraints.
+* `STOCK_CAPTURE_PROTOCOL.md` - Operator instructions for Stray Scanner LiDAR capturing.

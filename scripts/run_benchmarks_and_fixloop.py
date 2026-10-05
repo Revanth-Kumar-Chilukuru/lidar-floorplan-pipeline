@@ -110,7 +110,7 @@ def run_benchmarks():
     # Save benchmark results
     benchmark_bundle = {
         "tier_benchmarks": tier_comparison,
-        "repeatability_eval": wall_diffs,
+        "repeatability_eval": "N/A (See scripts/run_fix_loop.py)",
         "head_to_head_polycam": head_to_head,
         "head_to_head_win_pct": "N/A (No Polycam Data)",
         "fix_loop": {

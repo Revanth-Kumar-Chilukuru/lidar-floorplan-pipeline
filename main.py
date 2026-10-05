@@ -143,7 +143,7 @@ def main():
     table = Table(title="Pipeline Execution Results", show_lines=True)
     table.add_column("Metric / Deliverable", style="cyan", no_wrap=True)
     table.add_column("Value", style="green")
-    table.add_column("Calibrated 95% Confidence Interval", style="yellow")
+    table.add_column("Heuristic 95% Confidence Interval", style="yellow")
     
     table.add_row(
         "Floor Area",

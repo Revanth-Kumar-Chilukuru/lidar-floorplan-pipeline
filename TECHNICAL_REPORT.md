@@ -2,115 +2,97 @@
 
 **Author:** Antigravity Engineering Candidate  
 **Target:** Founding Backend AI Engineer Take-Home  
-**Date:** October 2026  
 
 ---
 
 ## 1. System Architecture
 
-The pipeline processes consumer smartphone captures (photos, video, or LiDAR depth) into dimensioned 2D/3D architectural floor plans, identifies visible surface damage, applies rule-based concealed insurance damage inferences, and compiles repair scopes of work.
+The pipeline processes consumer smartphone captures into dimensioned 2D architectural floor plans, identifies visible surface damage, applies rule-based concealed insurance damage inferences, and compiles repair scopes of work.
 
 ```
-                     ┌──────────────────────────────────────────┐
-                     │          Input Tiers (iOS Sensor)        │
-                     └────────────────────┬─────────────────────┘
-                                          │
-                  ┌───────────────────────┼───────────────────────┐
-                  ▼                       ▼                       ▼
+                     ┌────────────────────────────────┐
+                     │          Input Tiers           │
+                     └────────────────────────────────┘
+                                      │
+                  ┌───────────────────┼───────────────────┐
+                  │                   │                   │
          Tier 1: Photos            Tier 2: Video           Tier 3: LiDAR
-         (2-8 Stills, No Depth)    (Handheld Walkthrough)  (Depth, Poses, IMU)
-                  │                       │                       │
-                  ▼                       ▼                       ▼
-         Vanishing Point &        Keyframe Flow &         Confidence Filter (>=2)
-         Manhattan Priors         Doorway Metric Prior    & Voxel Grid Backproject
-                  │                       │                       │
-                  └───────────────────────┼───────────────────────┘
+         (Not Implemented)         (Not Implemented)       (Depth, Poses, IMU)
+                                                          │
+                                                  Confidence Filter
+                                                  & Voxel Downsample
+                                                          │
+                         ┌────────────────────────────────┐
+                         │   Structural Geometry Engine   │
+                         │  - Histogram & Median 1D Peak  │
+                         │  - PCA Manhattan Footprint     │
+                         │  - Torso-Height 2D Slicing     │
+                         │  - Sub-cell Contour Extraction │
+                         └────────────────────────────────┘
                                           │
-                                          ▼
-                         ┌──────────────────────────────────┐
-                         │   Structural Geometry Engine     │
-                         │  - Plane RANSAC (Floor/Ceiling)  │
-                         │  - Manhattan World Snapping      │
-                         │  - Torso-Height 2D Slicing       │
-                         │  - Doorway / Opening Profiling   │
-                         └────────────────┬─────────────────┘
+                         ┌────────────────────────────────┐
+                         │   Damage & Insurance Engine    │
+                         │  - (Synthetic / Rule-based)    │
+                         │  - Concealed Damage Graph      │
+                         │  - Surface-Keyed Scope         │
+                         └────────────────────────────────┘
                                           │
-                                          ▼
-                         ┌──────────────────────────────────┐
-                         │   Damage & Insurance Engine      │
-                         │  - Surface Defect Metric Extent  │
-                         │  - Concealed Damage Rule Graph   │
-                         │  - Surface-Keyed Scope of Work   │
-                         └────────────────┬─────────────────┘
-                                          │
-                                          ▼
-                         ┌──────────────────────────────────┐
-                         │      Deliverable Generators      │
-                         │  - Validated Pydantic Schema     │
-                         │  - 300 DPI Vector Floor Plan     │
-                         └──────────────────────────────────┘
+                         ┌────────────────────────────────┐
+                         │      Deliverable Generators    │
+                         │  - Validated Pydantic Schema   │
+                         │  - Dimensioned Floor Plan      │
+                         └────────────────────────────────┘
 ```
 
 ---
 
 ## 2. Tier Design & Device Matrix
 
-| Tier | Input Medium | Sensor Requirements | Coordinate Constraints | Uncertainty Model |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tier 3 (LiDAR)** | Depth + Poses + Intrinsics | Apple dToF LiDAR (16-bit uint16 depth, 8-bit conf) | Metric world space ($Y$-up, $X/Z$ horizontal) | Wall: $\pm 0.5\%$, Ceiling: $\pm 1.2\text{ cm}$, Area: $\pm 1.5\%$ |
-| **Tier 2 (Video)** | Handheld MP4 clip | Monocular RGB (1080p/4K) | Optical flow motion parallax + door height scale ($2.03\text{m}$) | Wall: $\pm 3.0\%$, Ceiling: $\pm 3.0\%$, Area: $\pm 4.5\%$ |
-| **Tier 1 (Photos)** | 2 to 8 stills / room | 48MP native camera | Manhattan orthogonal room corner vanishing rays | Wall: $\pm 8.0\%$, Ceiling: $\pm 8.0\%$, Area: $\pm 12.0\%$ |
+| Tier | Input Medium | Sensor Requirements | Implementation Status |
+| :--- | :--- | :--- | :--- |
+| **Tier 3 (LiDAR)** | Depth + Poses | Apple dToF LiDAR (16-bit) | **Implemented and Validated** |
+| **Tier 2 (Video)** | Handheld MP4 clip | Monocular RGB | **Not Implemented** |
+| **Tier 1 (Photos)** | 2 to 8 stills / room | Native camera | **Not Implemented** |
+
+*Note: The user did not have access to an iPhone, thus no non-Pro captures were created. Tier 1 and 2 fail loudly with `NotImplementedError` rather than returning fabricated numbers.*
 
 ---
 
-## 3. Drift Accountability & Pose Graph Regularization
+## 3. Drift Accountability & Manhattan Alignment
 
-### The Drift Phenomenon
-ARKit visual-inertial odometry integrates IMU accelerometer/gyroscope measurements with sparse visual feature tracks. On multi-room captures ($> 50\text{m}$ walk), small integration biases cause rotational drift in yaw ($2^\circ - 5^\circ$). Using raw poses directly produces sheared room boundaries, duplicate walls, and breaks loop closure.
+ARKit visual-inertial odometry integrates IMU accelerometer measurements with sparse visual feature tracks. Over time, this causes rotational drift in yaw.
 
-### Our Solution: Plane-Anchored Manhattan Optimization
-1. **Dominant Normal Extraction:** Perform 2D PCA and point cloud density histogramming on torso-height slices to determine the room's principal Manhattan orientation angle $\theta_0$.
-2. **Orthogonal Plane Snapping:** Rotate the point cloud by $-\theta_0$, ensuring walls align with canonical Cartesian axes ($X$ and $Z$). 
-3. **Loop Closure Residual Relaxation:** When the start and end of a walkthrough loop align within doorway proximity, distribute the residual translation gap ($\Delta t = 0.384\text{m}$) across the trajectory spline.
-
----
-
-## 4. Error Budget & Calibration Analysis
-
-Measurement uncertainty propagates through each pipeline stage:
-
-$$\sigma_{\text{wall}}^2 = \sigma_{\text{sensor}}^2 + \sigma_{\text{drift}}^2 + \sigma_{\text{segmentation}}^2$$
-
-* **LiDAR Depth Inaccuracy:** Apple LiDAR exhibits standard error $\sigma_d \le 0.008\text{m}$ up to $3.5\text{m}$ for surfaces with confidence $\ge 2$.
-* **Plane RANSAC Fit Error:** Floor and ceiling plane fitting achieves inlier residual $\le 0.012\text{m}$, yielding ceiling height confidence bounds of $\pm 1.2\text{ cm}$.
-* **Confidence Calibration Policy:** As sensor data thins (LiDAR $\to$ Video $\to$ Photos), our output contract widens its 95% confidence intervals honestly:
-  $$\text{CI}_{95}(\text{LiDAR}) = \pm 0.5\% \quad \longrightarrow \quad \text{CI}_{95}(\text{Video}) = \pm 3.0\% \quad \longrightarrow \quad \text{CI}_{95}(\text{Photos}) = \pm 8.0\%$$
-  This prevents "confident garbage" penalties.
+### Manhattan Alignment Ablation (Not True Loop Closure)
+In this submission, true pose-graph optimization loop closure is **not implemented**. Instead, a PCA-based Manhattan alignment footprint rotation is applied to correct orthogonal shearing.
+1. **Dominant Normal Extraction:** Perform 2D PCA on torso-height slices to determine the room's principal Manhattan orientation angle $\theta_0$.
+2. **Orthogonal Plane Snapping:** Rotate the footprint by $-\theta_0$, ensuring walls align with canonical Cartesian axes ($X$ and $Z$). 
+3. **Loop Closure Residual:** The raw odometry loop-closure residual is reported for diagnostic purposes, but it is not relaxed across the trajectory graph.
 
 ---
 
-## 5. The Fix Loop Story (Part 4 Summary)
+## 4. Error Budget & Heuristics
 
-* **Baseline Problem:** On the 100-meter multi-room scan (`c7d28f72c6`), uncorrected camera poses produced a $4.82^\circ$ angular shear, failing wall repeatability and distorting door portals.
-* **Root Cause:** Accumulated unmitigated yaw drift across the trajectory.
-* **Shipped Fix:** Implemented Manhattan frame principal axis alignment and plane-anchored regularization in `src/lidar_pipeline.py`.
-* **Empirical Delta:** Wall orthogonality error dropped from $4.82^\circ \to 0.00^\circ$ (strict $90^\circ$ junctions); door opening width accuracy improved from $3.8\text{ cm} \to 0.5\text{ cm}$ error. Gate moved from **FAIL $\to$ FULL PASS**.
+The provided intervals are heuristics and are not derived from a formal sensor noise calibration experiment. True real-world accuracy benchmarking requires ground truth laser measurements which are not present in the dataset.
+
+* **Ceiling Heights:** Estimated using robust 1D histogram-peak extraction and median filtering. If a ceiling cannot be extracted with sufficient support points, it strictly returns `unmeasured` (value `None`, `is_prior=True`).
+* **Heuristic Confidence Bounds:**
+  - Wall lengths: $\pm 1.5\%$ (heuristic)
+  - Area: $\pm 1.5\%$ (heuristic)
 
 ---
 
-## 6. Known Failure Modes & Environmental Edge Cases
+## 5. The Fix Loop Story (Determinism)
 
-Real-world residential properties present challenging optical environments. Our pipeline addresses these explicitly:
+* **Baseline Problem:** The pipeline exhibited algorithmic non-determinism, producing different metric outputs on the exact same scan data in consecutive runs.
+* **Root Cause:** Use of `o3d.geometry.PointCloud().voxel_down_sample` and C++ RANSAC (`segment_plane`), which cannot be seeded by NumPy.
+* **Shipped Fix:** Eliminated Open3D entirely. Point downsampling was rewritten using a deterministic `np.unique` voxel hashing method. RANSAC was replaced with a deterministic median filter. Footprint extraction was upgraded to sub-cell refinement.
+* **Empirical Delta:** Wall spread variance dropped from 11.8 cm to 0.00 cm across 10 identical separate-process runs. Note that this proves algorithmic determinism, not capture-to-capture physical repeatability.
 
-1. **Mirrors & Glass Partitions:**
-   * *Problem:* LiDAR laser pulses pass through glass or reflect off mirrors, generating phantom rooms behind walls.
-   * *Mitigation:* We filter depth returns where intensity/confidence $< 2$ and reject wall normals that violate the convex room hull.
-2. **Wet-Look / Specular Flooring:**
-   * *Problem:* High specular reflectance causes phase cancellation and null depth returns.
-   * *Mitigation:* RANSAC floor segmentation interpolates across specular voids using neighboring matte floor inliers.
-3. **Low-Light Environments:**
-   * *Problem:* Optical feature loss leads to visual odometry tracking failure.
-   * *Mitigation:* Operators follow our capture protocol (turning on overhead lights); the pipeline logs IMU high-frequency accelerometer variance to flag tracking degradation.
-4. **Heavy Clutter / Furnished Spaces:**
-   * *Problem:* Beds, couches, and tables occlude floor-wall junctions.
-   * *Mitigation:* We slice the 3D point cloud at torso height ($0.8\text{m} - 1.6\text{m}$ above the RANSAC floor), passing cleanly above standard furniture and beneath ceiling fixtures.
+---
+
+## 6. Known Failure Modes & What Was Not Done
+
+1. **No True Pose-Graph Optimization:** The PCA Manhattan rotation only aligns the footprint. It does not correct intra-trajectory drift or true loop closures.
+2. **Video & Photo Tiers Omitted:** They have been marked as explicitly `NotImplementedError`. Returning fabricated/hardcoded constants was rejected as it violates the honesty rule constraint.
+3. **Synthetic Damage Detection:** The damage regions and classifications are synthetic inputs injected to demonstrate the rule engine and schema mapping, not produced by a live vision model.
+4. **Sub-cell Grid Approximation Errors:** OpenCV morphological operators heavily dilate wall bounds. While sub-cell point-projection refinement reduces this error to ~1cm on synthetic shapes, complex concave rooms may still experience discretization artifacts.
