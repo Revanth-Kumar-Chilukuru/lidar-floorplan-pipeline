@@ -40,6 +40,9 @@ def run_repeatability():
         with open(json_file, 'r') as f:
             data = json.load(f)
             
+        if 'timestamp' in data:
+            del data['timestamp']
+            
         if i == 1:
             first_json = data
             first_json_path = json_file
@@ -51,7 +54,7 @@ def run_repeatability():
                 print(f"  FAIL: Run {i} differs from Run 1!")
                 success = False
             else:
-                print(f"  Run {i} is byte-for-byte identical to Run 1.")
+                print(f"  Run {i} is functionally identical to Run 1.")
                 
     if success:
         print("\nSUCCESS: Pipeline is perfectly deterministic across 10 isolated runs.")

@@ -27,25 +27,22 @@ def run_benchmarks():
     scan3 = "Assignment - YC Startup/single_scan_with_ceiling/c7d28f72c6"
     
     # -------------------------------------------------------------
-    # 1. FIX LOOP: Drift Accountability & Wall Orthogonality Ablation
+    # 1. FIX LOOP: Manhattan Alignment Ablation (Not True Drift Correction)
     # -------------------------------------------------------------
-    print("[1/4] Running Fix Loop Ablation (Drift Correction OFF vs ON)...")
+    print("[1/4] Running Manhattan Alignment Ablation (OFF vs ON)...")
+    print("  Note: This is merely a PCA-based footprint rotation, NOT pose-graph drift optimization.")
     
-    # BEFORE RUN: Drift correction OFF (poses as-is)
+    # BEFORE RUN: Alignment OFF
     room_before, metrics_before = lidar_pipeline.process_scan(
         scan3, room_id="rm_suite_before", room_name="Suite (Poses As-Is - Before)", drift_correction=False
     )
-    renderer.render_room(room_before, "outputs/fix_loop/before/suite_before_render.png", title="BEFORE FIX: Poses Used As-Is (Uncorrected Drift)")
-    with open("outputs/fix_loop/before/suite_before_plan.json", "w") as f:
-        f.write(room_before.model_dump_json(indent=2))
-        
-    # AFTER RUN: Drift correction ON (Manhattan Plane-Anchored)
+    renderer.render_room(room_before, "outputs/fix_loop/before/suite_before_render.png", title="Alignment OFF: Raw Odometry Poses")
+    
+    # AFTER RUN: Alignment ON (Manhattan Plane-Anchored)
     room_after, metrics_after = lidar_pipeline.process_scan(
-        scan3, room_id="rm_suite_after", room_name="Suite (Drift Corrected - After)", drift_correction=True
+        scan3, room_id="rm_suite_after", room_name="Suite (Manhattan Aligned - After)", drift_correction=True
     )
-    renderer.render_room(room_after, "outputs/fix_loop/after/suite_after_render.png", title="AFTER FIX: Manhattan Plane-Anchored Drift Correction")
-    with open("outputs/fix_loop/after/suite_after_plan.json", "w") as f:
-        f.write(room_after.model_dump_json(indent=2))
+    renderer.render_room(room_after, "outputs/fix_loop/after/suite_after_render.png", title="Alignment ON: PCA Manhattan Rotation")
         
     # Calculate orthogonality & repeatability error
     pts_before = np.array(room_before.polygon_vertices)
@@ -60,10 +57,10 @@ def run_benchmarks():
     cos_angle_after = np.dot(v1_a, v2_a) / (np.linalg.norm(v1_a) * np.linalg.norm(v2_a))
     angle_error_after_deg = abs(90.0 - np.degrees(np.arccos(np.clip(cos_angle_after, -1.0, 1.0))))
     
-    print(f"  Fix Loop Result:")
-    print(f"    - Before Fix Angular Shear / Drift Error: {angle_error_before_deg:.2f}° (FAIL: exceeds tolerance, distorted footprint)")
-    print(f"    - After Fix Angular Shear / Drift Error:  {angle_error_after_deg:.2f}° (PCA Manhattan aligned footprint)")
-    print(f"    - Residual Loop Closure Displacement: {metrics_after['drift_stats']['loop_closure_residual_m']:.3f} m")
+    print(f"  Alignment Ablation Result:")
+    print(f"    - Unaligned Footprint Corner Angle Deviation from 90°: {angle_error_before_deg:.2f}°")
+    print(f"    - Aligned Footprint Corner Angle Deviation from 90°:  {angle_error_after_deg:.2f}° (PCA Manhattan aligned footprint)")
+    print(f"    - Raw Odometry Loop-Closure Residual: {metrics_after['drift_stats']['loop_closure_residual_m']:.3f} m (Uncorrected)")
 
     # -------------------------------------------------------------
     # 2. GATES AT ALL THREE TIERS

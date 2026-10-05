@@ -257,10 +257,36 @@ class LidarReconstructionPipeline:
             largest_contour = max(contours, key=cv2.contourArea)
             # Simplify contour to polygons
             peri = cv2.arcLength(largest_contour, True)
-            approx = cv2.approxPolyDP(largest_contour, 0.02 * peri, True)
+            # Reduce epsilon to 0.015 for tighter boundary
+            approx = cv2.approxPolyDP(largest_contour, 0.015 * peri, True)
             
             approx_pts = approx.reshape(-1, 2)
             corners_aligned = (approx_pts - 20) * grid_res + np.array([min_x_val, min_z_val])
+            
+            # Sub-cell refinement: Pull segments toward true point median to remove grid dilation error
+            if len(corners_aligned) >= 3:
+                # We need to shift the segments inwards/outwards to match the raw points
+                refined_corners = np.copy(corners_aligned)
+                for i in range(len(corners_aligned)):
+                    p1 = corners_aligned[i]
+                    p2 = corners_aligned[(i + 1) % len(corners_aligned)]
+                    wall_vec = p2 - p1
+                    length = np.linalg.norm(wall_vec)
+                    if length < 0.1: continue
+                    wall_dir = wall_vec / length
+                    wall_norm = np.array([-wall_dir[1], wall_dir[0]])
+                    
+                    diff = aligned_pts - p1
+                    along = np.dot(diff, wall_dir)
+                    perp = np.dot(diff, wall_norm)
+                    
+                    # Points near this wall
+                    mask = (along >= 0) & (along <= length) & (np.abs(perp) < 0.5)
+                    if np.sum(mask) > 10:
+                        shift_dist = np.median(perp[mask])
+                        refined_corners[i] += shift_dist * wall_norm
+                        refined_corners[(i + 1) % len(corners_aligned)] += shift_dist * wall_norm
+                corners_aligned = refined_corners
             
             # Ensure at least a triangle
             if len(corners_aligned) < 3:
