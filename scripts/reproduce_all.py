@@ -45,7 +45,7 @@ def main():
     )
     
     print("\n******************************************************************")
-    print("✓ REPRODUCTION COMPLETE: All numbers and artifacts verified!")
+    print("OK REPRODUCTION COMPLETE: All numbers and artifacts verified!")
     print("******************************************************************")
 
 if __name__ == "__main__":
