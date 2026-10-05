@@ -141,7 +141,7 @@ class LidarReconstructionPipeline:
         
         return downsampled_pts, traj_positions, drift_stats
 
-    def extract_vertical_planes(self, pts: np.ndarray) -> Tuple[float, float, float, np.ndarray]:
+    def extract_vertical_planes(self, pts: np.ndarray) -> Tuple[float, Optional[float], Optional[float], np.ndarray]:
         """Extract floor and ceiling planes deterministically without RANSAC."""
         y_coords = pts[:, 1]
         
@@ -152,18 +152,21 @@ class LidarReconstructionPipeline:
         floor_bin_idx = np.argmax(hist[:len(hist)//3])
         y_floor_est = bin_centers[floor_bin_idx]
         
-        # Refine floor deterministically (mean of points within 10cm of peak)
+        # Refine floor deterministically (median of points within 10cm of peak)
         floor_mask = (y_coords >= y_floor_est - 0.10) & (y_coords <= y_floor_est + 0.10)
         floor_pts = pts[floor_mask]
         
         if len(floor_pts) > 100:
-            y_floor = float(np.mean(floor_pts[:, 1]))
+            y_floor = float(np.median(floor_pts[:, 1]))
         else:
             y_floor = float(y_floor_est)
             
         # Ceiling is highest points with significant cluster
         upper_mask = y_coords > (y_floor + 1.8)
         upper_pts = pts[upper_mask]
+        
+        y_ceil = None
+        ceiling_height = None
         
         if len(upper_pts) > 500:
             hist_ceil, bin_edges_ceil = np.histogram(upper_pts[:, 1], bins=40)
@@ -175,20 +178,20 @@ class LidarReconstructionPipeline:
             ceil_pts = pts[ceil_mask]
             
             if len(ceil_pts) > 100:
-                y_ceil = float(np.mean(ceil_pts[:, 1]))
+                y_ceil = float(np.median(ceil_pts[:, 1]))
                 ceiling_height = float(abs(y_ceil - y_floor))
-            else:
-                y_ceil = y_floor + 2.75
-                ceiling_height = 2.75
-        else:
-            y_ceil = y_floor + 2.75
-            ceiling_height = 2.75
             
         # Extract torso slice (above furniture, below ceiling)
-        torso_mask = (y_coords >= y_floor + self.torso_min_rel) & (y_coords <= y_floor + self.torso_max_rel)
+        # If ceiling is unmeasured, use a safe prior height like 2.75 for the slice bound
+        effective_y_ceil = y_ceil if y_ceil is not None else (y_floor + 2.75)
+        torso_max = min(y_floor + self.torso_max_rel, effective_y_ceil - 0.2)
+        torso_mask = (y_coords >= y_floor + self.torso_min_rel) & (y_coords <= torso_max)
         torso_pts = pts[torso_mask]
         
-        return float(y_floor), float(y_ceil), round(ceiling_height, 4), torso_pts
+        # return ceiling_height as Optional[float]
+        ceiling_height_val = round(ceiling_height, 4) if ceiling_height is not None else None
+        
+        return float(y_floor), y_ceil, ceiling_height_val, torso_pts
 
     def compute_manhattan_alignment(self, pts_2d: np.ndarray) -> float:
         """Find the dominant Manhattan orientation (principal wall angle in radians)."""
@@ -399,6 +402,14 @@ class LidarReconstructionPipeline:
             # LiDAR gate: repeatability <= 1cm or 0.5%
             err_margin = max(0.01, w_len * 0.005)
             
+            wall_height_ci = ConfidenceInterval(
+                value=ceiling_height,
+                ci_lower=round(ceiling_height - 0.012, 3) if ceiling_height else None,
+                ci_upper=round(ceiling_height + 0.012, 3) if ceiling_height else None,
+                unit="m",
+                is_prior=(ceiling_height is None)
+            )
+            
             wall_models.append(Wall(
                 id=w_data["id"],
                 start_point=w_data["start"],
@@ -409,25 +420,24 @@ class LidarReconstructionPipeline:
                     ci_upper=round(w_len + err_margin, 3),
                     unit="m"
                 ),
-                height=ConfidenceInterval(
-                    value=ceiling_height,
-                    ci_lower=round(ceiling_height - 0.012, 3),
-                    ci_upper=round(ceiling_height + 0.012, 3),
-                    unit="m"
-                ),
+                height=wall_height_ci,
                 openings=w_openings
             ))
             
         area_err = floor_area * 0.015 # 1.5% area CI
+        
+        room_ceil_ci = ConfidenceInterval(
+            value=ceiling_height,
+            ci_lower=round(ceiling_height - 0.012, 3) if ceiling_height else None,
+            ci_upper=round(ceiling_height + 0.012, 3) if ceiling_height else None,
+            unit="m",
+            is_prior=(ceiling_height is None)
+        )
+        
         room_plan = RoomPlan(
             room_id=room_id,
             room_name=room_name,
-            ceiling_height=ConfidenceInterval(
-                value=ceiling_height,
-                ci_lower=round(ceiling_height - 0.012, 3),
-                ci_upper=round(ceiling_height + 0.012, 3),
-                unit="m"
-            ),
+            ceiling_height=room_ceil_ci,
             floor_area=ConfidenceInterval(
                 value=floor_area,
                 ci_lower=round(floor_area - area_err, 3),

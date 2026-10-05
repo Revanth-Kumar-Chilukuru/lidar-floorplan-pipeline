@@ -76,7 +76,7 @@ def run_benchmarks():
     tier_comparison["Tier 3 (LiDAR)"] = {
         "length_m": lidar_room.walls[0].length.value,
         "width_m": lidar_room.walls[1].length.value,
-        "height_m": lidar_room.ceiling_height.value,
+        "height_m": lidar_room.ceiling_height.value if lidar_room.ceiling_height.value else "unmeasured",
         "area_m2": lidar_room.floor_area.value,
         "status": "Evaluated"
     }

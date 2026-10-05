@@ -135,10 +135,17 @@ def main():
         f"{primary_room.floor_area.value:.2f} m²",
         f"[{primary_room.floor_area.ci_lower:.2f}, {primary_room.floor_area.ci_upper:.2f}] m²"
     )
+    if primary_room.ceiling_height.value is not None:
+        c_val = f"{primary_room.ceiling_height.value:.3f} m"
+        c_ci = f"[{primary_room.ceiling_height.ci_lower:.3f}, {primary_room.ceiling_height.ci_upper:.3f}] m"
+    else:
+        c_val = "unmeasured"
+        c_ci = "(prior: 2.75m)"
+        
     table.add_row(
         "Ceiling Height",
-        f"{primary_room.ceiling_height.value:.3f} m",
-        f"[{primary_room.ceiling_height.ci_lower:.3f}, {primary_room.ceiling_height.ci_upper:.3f}] m"
+        c_val,
+        c_ci
     )
     table.add_row(
         "Perimeter",

@@ -3,10 +3,11 @@ from pydantic import BaseModel, Field
 
 class ConfidenceInterval(BaseModel):
     """Calibrated confidence interval representing measurement uncertainty."""
-    value: float = Field(..., description="Estimated nominal measurement value")
-    ci_lower: float = Field(..., description="Lower bound of 95% confidence interval")
-    ci_upper: float = Field(..., description="Upper bound of 95% confidence interval")
+    value: Optional[float] = Field(None, description="Estimated nominal measurement value. None if unmeasured.")
+    ci_lower: Optional[float] = Field(None, description="Lower bound of 95% confidence interval")
+    ci_upper: Optional[float] = Field(None, description="Upper bound of 95% confidence interval")
     unit: str = Field("m", description="Unit of measurement (m, m2, deg)")
+    is_prior: bool = Field(False, description="True if value is an unmeasured prior/default.")
 
 class Opening(BaseModel):
     """An opening such as a door, open entryway, or window in a wall."""
