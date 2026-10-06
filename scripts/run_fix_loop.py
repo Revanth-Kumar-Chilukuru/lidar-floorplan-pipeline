@@ -78,8 +78,19 @@ def main():
     if os.path.exists(worktree_dir):
         subprocess.run(f"git worktree remove {worktree_dir} --force", shell=True)
         
-    print("\n[BEFORE FIX] Creating git worktree at pre-determinism-fix commit (879d30a)...")
-    subprocess.run(f"git worktree add {worktree_dir} 879d30a", shell=True)
+    try:
+        # Dynamically lookup the pre-fix commit by its message
+        res = subprocess.run(["git", "log", "--format=%H", "--grep=^docs & benchmarks", "-1"], capture_output=True, text=True, check=True)
+        commit_hash = res.stdout.strip()
+        if not commit_hash:
+            print("ERROR: Could not find pre-fix commit (message starting with 'docs & benchmarks'). Failing loudly.")
+            sys.exit(1)
+            
+        print(f"\n[BEFORE FIX] Creating git worktree at pre-determinism-fix commit ({commit_hash[:7]})...")
+        subprocess.run(f"git worktree add {worktree_dir} {commit_hash}", shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: Git command failed. {e}")
+        sys.exit(1)
     
     # Copy subset data into worktree
     if not os.path.exists(os.path.join(worktree_dir, "Assignment - YC Startup/single_room/c00a170fe1")):
