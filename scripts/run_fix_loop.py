@@ -25,6 +25,7 @@ def extract_metrics(json_path):
 
 def run_10_times(script_dir, out_dir_base, scan_path):
     python_bin = sys.executable
+    out_dir_base = os.path.abspath(out_dir_base)
     areas = []
     ceilings = []
     all_walls = []
@@ -36,10 +37,14 @@ def run_10_times(script_dir, out_dir_base, scan_path):
     for i in range(1, 11):
         out_dir = os.path.join(out_dir_base, f"run_{i}")
         os.makedirs(out_dir)
-        
-        cmd = f'"{python_bin}" "{script_dir}/main.py" --input "{scan_path}" --tier lidar --output-dir "{out_dir}"'
+        cmd = f'"{python_bin}" "main.py" --input "{scan_path}" --tier lidar --output-dir "{out_dir}"'
         print(f"  Executing Run {i}/10...", end="\r")
-        subprocess.run(cmd, shell=True, capture_output=True)
+        res = subprocess.run(cmd, shell=True, capture_output=True, cwd=script_dir)
+        if res.returncode != 0:
+            print(f"ERROR running {cmd}")
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+            sys.exit(1)
         
         json_file = os.path.join(out_dir, "c00a170fe1_lidar_plan.json")
         area, ceiling, walls = extract_metrics(json_file)
@@ -93,11 +98,14 @@ def main():
         sys.exit(1)
     
     # Copy subset data into worktree
-    if not os.path.exists(os.path.join(worktree_dir, "Assignment - YC Startup/single_room/c00a170fe1")):
-        os.makedirs(os.path.join(worktree_dir, "Assignment - YC Startup/single_room"), exist_ok=True)
-        shutil.copytree("data/sample_subset/single_room/c00a170fe1", os.path.join(worktree_dir, "Assignment - YC Startup/single_room/c00a170fe1"))
+    os.makedirs(os.path.join(worktree_dir, "Assignment - YC Startup/single_room"), exist_ok=True)
+    shutil.copytree("data/sample_subset/single_room/c00a170fe1", os.path.join(worktree_dir, "Assignment - YC Startup/single_room/c00a170fe1"), dirs_exist_ok=True)
     
     scan_path_before = "Assignment - YC Startup/single_room/c00a170fe1"
+    
+    print("\n[BEFORE FIX] Installing legacy dependency (open3d) for old commit...")
+    subprocess.run(["uv", "pip", "install", "open3d"], check=True)
+    
     before_metrics = run_10_times(worktree_dir, "outputs/fix_loop_before", scan_path_before)
     
     subprocess.run(f"git worktree remove {worktree_dir} --force", shell=True)
