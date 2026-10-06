@@ -3,7 +3,7 @@
 ## 1. The Identified Worst Gate
 **Target Gate**: Repeatability (Max variance $\le 1.0\text{ cm}$ on identical room captures).
 **Observation**: The original pipeline exhibited non-determinism, producing different metric outputs on the exact same scan data in consecutive runs. 
-**Status (Before)**: FAIL (Max spread: 40.90 cm)
+**Status (Before)**: FAIL (Max spread: 22.50 cm)
 
 ## 2. Root Cause Analysis
 The variability was isolated to two sources of algorithmic non-determinism:
@@ -17,7 +17,7 @@ We eliminated Open3D from the plane extraction pipeline entirely.
 * Wall footprint extraction was upgraded to sub-cell refinement, removing dependency on unstable bounding boxes.
 
 ## 4. Verification Results (10 Runs)
-*   **Before Fix Spread**: 40.90 cm max delta (algorithmic non-determinism).
+*   **Before Fix Spread**: 22.50 cm max delta (algorithmic non-determinism).
 *   **After Fix Spread**: 0.00 cm max delta.
 *   **Gate Status**: PASS
 
