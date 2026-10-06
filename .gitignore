@@ -46,3 +46,6 @@ eval_output/
 !data/sample_subset/**/confidence/
 !data/sample_subset/**/depth/*.png
 !data/sample_subset/**/confidence/*.png
+
+test_venv/
+docs/*.html
