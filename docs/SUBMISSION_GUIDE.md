@@ -1,7 +1,7 @@
 # Submission Guide: Property Capture Pipeline
 
 **Project**: An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans and automated repair scopes of work.
-**Repository**: `<span style="white-space: nowrap;">https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline</span>`
+**Repository**: `https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline`
 
 ## Quick Start (3 Commands)
 ```bash
@@ -39,7 +39,7 @@ uv run python scripts/reproduce_all.py
 
 ## Known Failure Modes
 1. **Pose-Graph Drift**: True SLAM loop closure is not implemented. A PCA footprint alignment heuristic partially corrects orthogonal orientation, but cumulative odometry drift remains in large loops.
-2. **Disconnected Wall Convex Hull**: To bound the trajectory, we rely on a Convex Hull which may overestimate concave or L-shaped rooms if large gaps exist in the walls. *Note: The `single_room` area varied between the full capture and the subset (33.4 m² vs 27.3 m²). Not fully explained; the footprint for this scan is sensitive to point density, so its area should not be trusted.*
+2. **Disconnected Wall Convex Hull**: To bound the trajectory, we rely on a Convex Hull which may overestimate concave or L-shaped rooms if large gaps exist in the walls. *Note: The single_room area varied between the full capture and the subset (33.4 m² vs 27.3 m²). Not fully explained; the footprint for this scan is sensitive to point density, so its area should not be trusted.*
 
 ## Deliverables Index
 - `README.md`: Entry point and reproduction steps.
@@ -50,3 +50,4 @@ uv run python scripts/reproduce_all.py
 - `STOCK_CAPTURE_PROTOCOL.md`: Operator instructions for LiDAR capturing.
 
 - `results/`: Output artifacts (JSON payloads, renders).
+

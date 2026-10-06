@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<style>
-@page { size: A4; margin: 1.5cm; }
-body { font-family: -apple-system, sans-serif; font-size: 10pt; line-height: 1.35; }
-table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }
-th { background: #f1f5f9; }
-</style>
+    <meta charset="utf-8">
+    <title>Submission Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        pre code { display: block; padding: 10px; overflow-x: auto; }
+        h1, h2, h3 { border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    </style>
 </head>
-<body><h1>Submission Guide: Property Capture Pipeline</h1>
+<body>
+<h1>Submission Guide: Property Capture Pipeline</h1>
 <p><strong>Project</strong>: An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans and automated repair scopes of work.
-<strong>Repository</strong>: <code>&lt;span style=&quot;white-space: nowrap;&quot;&gt;https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline&lt;/span&gt;</code></p>
+<strong>Repository</strong>: <code>https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline</code></p>
 <h2>Quick Start (3 Commands)</h2>
 <pre><code class="language-bash"># 1. Clone and enter repo
 git clone https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline &amp;&amp; cd lidar-floorplan-pipeline
@@ -24,25 +28,46 @@ uv venv --python 3.11 &amp;&amp; uv pip install -r requirements.txt
 uv run python scripts/reproduce_all.py
 </code></pre>
 <h2>Device &amp; Tier Matrix</h2>
-<p>| Tier | Required Hardware | Status | What it Delivers |
-|---|---|---|---|
-| <strong>Tier 3 (LiDAR)</strong> | iPhone 12+ Pro, iPad Pro 2020+ | <strong>Active</strong> | 2D dimensioned floor plans, orthogonal wall footprint, metric scale, room boundaries. |
-| <strong>Tier 2 (Video)</strong> | iPhone 15 or newer (per the case study) | <strong>Not Implemented</strong> | Explicitly fails cleanly. Requires GPU/SLAM. |
-| <strong>Tier 1 (Photos)</strong> | Any modern smartphone | <strong>Not Implemented</strong> | Explicitly fails cleanly. Requires LayoutNet models. |</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Required Hardware</th>
+<th>Status</th>
+<th>What it Delivers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tier 3 (LiDAR)</strong></td>
+<td>iPhone 12+ Pro, iPad Pro 2020+</td>
+<td><strong>Active</strong></td>
+<td>2D dimensioned floor plans, orthogonal wall footprint, metric scale, room boundaries.</td>
+</tr>
+<tr>
+<td><strong>Tier 2 (Video)</strong></td>
+<td>iPhone 15 or newer (per the case study)</td>
+<td><strong>Not Implemented</strong></td>
+<td>Explicitly fails cleanly. Requires GPU/SLAM.</td>
+</tr>
+<tr>
+<td><strong>Tier 1 (Photos)</strong></td>
+<td>Any modern smartphone</td>
+<td><strong>Not Implemented</strong></td>
+<td>Explicitly fails cleanly. Requires LayoutNet models.</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Hardware Constraint Note</strong>: The author does not own an iPhone. All captures and code tests were run using the provided sample <code>Stray Scanner</code> dataset. As Stray Scanner requires an active LiDAR sensor, processing data from non-Pro phones or video/photo fallbacks is not currently possible on this CPU-bound pipeline without fabricating results.</p>
 <h2>Verification Status</h2>
-<p><strong>Verified:</strong></p>
-<ul>
-<li>✅ <strong>Algorithmic Determinism</strong>: Deterministic math replaces RANSAC/Open3D, ensuring 0 variance on the same data.</li>
-<li>✅ <strong>Honest Null-Safety</strong>: Missing ceilings or out-of-bounds constraints are strictly reported as &quot;unmeasured&quot; (null) rather than defaulted to arbitrary integers.</li>
-<li>✅ <strong>Trajectory Bounding</strong>: Extracted footprint fully encompasses the camera tracking path for all sample scans.</li>
-</ul>
-<p><strong>Not Verified:</strong></p>
-<ul>
-<li>❌ <strong>Physical Repeatability</strong>: We cannot prove scan-to-scan physical reproducibility without multiple physical captures of the same room.</li>
-<li>❌ <strong>Head-to-Head Accuracy</strong>: No <code>Polycam</code> exports were available in the dataset for a true comparison.</li>
-<li>❌ <strong>Opening Detection Accuracy</strong>: &quot;±2 cm on ≥85% gate&quot; for opening detection remains unverified, as no laser/tape ground truth exists in the dataset.</li>
-</ul>
+<p><strong>Verified:</strong>
+- ✅ <strong>Algorithmic Determinism</strong>: Deterministic math replaces RANSAC/Open3D, ensuring 0 variance on the same data.
+- ✅ <strong>Honest Null-Safety</strong>: Missing ceilings or out-of-bounds constraints are strictly reported as "unmeasured" (null) rather than defaulted to arbitrary integers. 
+- ✅ <strong>Trajectory Bounding</strong>: Extracted footprint fully encompasses the camera tracking path for all sample scans.</p>
+<p><strong>Not Verified:</strong>
+- ❌ <strong>Physical Repeatability</strong>: We cannot prove scan-to-scan physical reproducibility without multiple physical captures of the same room. 
+- ❌ <strong>Head-to-Head Accuracy</strong>: No <code>Polycam</code> exports were available in the dataset for a true comparison.
+- ❌ <strong>Opening Detection Accuracy</strong>: "±2 cm on ≥85% gate" for opening detection remains unverified, as no laser/tape ground truth exists in the dataset.</p>
 <h2>Known Failure Modes</h2>
 <ol>
 <li><strong>Pose-Graph Drift</strong>: True SLAM loop closure is not implemented. A PCA footprint alignment heuristic partially corrects orthogonal orientation, but cumulative odometry drift remains in large loops.</li>
@@ -50,15 +75,9 @@ uv run python scripts/reproduce_all.py
 </ol>
 <h2>Deliverables Index</h2>
 <ul>
-<li>
-<p><code>README.md</code>: Entry point and reproduction steps.</p>
-</li>
-<li>
-<p><code>TECHNICAL_REPORT.pdf</code>: Honest architectural analysis and algorithm decisions.</p>
-</li>
-<li>
-<p><code>COMPLIANCE_MATRIX.md</code>: Mapping of prompt requirements to code realities.</p>
-</li>
+<li><code>README.md</code>: Entry point and reproduction steps.</li>
+<li><code>TECHNICAL_REPORT.pdf</code>: Honest architectural analysis and algorithm decisions.</li>
+<li><code>COMPLIANCE_MATRIX.md</code>: Mapping of prompt requirements to code realities.</li>
 <li>
 <p><code>FIX_LOOP_DECLARATION.md</code>: Before/after metrics for the determinism fix.</p>
 </li>
