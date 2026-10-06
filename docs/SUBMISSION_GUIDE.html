@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Submission Guide</title>
 <style>
 @page { size: A4; margin: 1.5cm; }
-body { font-family: -apple-system, sans-serif; font-size: 10.5pt; line-height: 1.45; }
+body { font-family: -apple-system, sans-serif; font-size: 10pt; line-height: 1.35; }
 table { border-collapse: collapse; width: 100%; margin: 10px 0; }
 th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }
 th { background: #f1f5f9; }
@@ -47,7 +46,7 @@ uv run python scripts/reproduce_all.py
 <h2>Known Failure Modes</h2>
 <ol>
 <li><strong>Pose-Graph Drift</strong>: True SLAM loop closure is not implemented. A PCA footprint alignment heuristic partially corrects orthogonal orientation, but cumulative odometry drift remains in large loops.</li>
-<li><strong>Disconnected Wall Convex Hull</strong>: To bound the trajectory, we rely on a Convex Hull which may overestimate concave or L-shaped rooms if large gaps exist in the walls. <em>Note: The <code>single_room</code> area varied between the full capture and the subset (33.4 m² vs 27.3 m²) because the full capture contains more frames looking further out the open doorway, inflating the outermost convex hull repair boundary.</em></li>
+<li><strong>Disconnected Wall Convex Hull</strong>: To bound the trajectory, we rely on a Convex Hull which may overestimate concave or L-shaped rooms if large gaps exist in the walls. <em>Note: The <code>single_room</code> area varied between the full capture and the subset (33.4 m² vs 27.3 m²). Not fully explained; the footprint for this scan is sensitive to point density, so its area should not be trusted.</em></li>
 </ol>
 <h2>Deliverables Index</h2>
 <ul>
