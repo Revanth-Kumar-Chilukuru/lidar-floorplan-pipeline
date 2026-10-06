@@ -1,0 +1,263 @@
+{
+  "property_id": "c00a170fe1",
+  "capture_tier": "lidar",
+  "total_floor_area": {
+    "value": 33.41,
+    "ci_lower": 32.91,
+    "ci_upper": 33.91,
+    "unit": "m2",
+    "is_prior": false
+  },
+  "rooms": [
+    {
+      "room_id": "room_1",
+      "room_name": "Primary Room",
+      "ceiling_height": {
+        "value": 1.8504,
+        "ci_lower": 1.838,
+        "ci_upper": 1.862,
+        "unit": "m",
+        "is_prior": false
+      },
+      "floor_area": {
+        "value": 33.411,
+        "ci_lower": 32.91,
+        "ci_upper": 33.912,
+        "unit": "m2",
+        "is_prior": false
+      },
+      "perimeter": 24.1,
+      "polygon_vertices": [
+        [
+          -6.721,
+          1.438
+        ],
+        [
+          -5.735,
+          0.362
+        ],
+        [
+          -0.591,
+          -1.026
+        ],
+        [
+          1.294,
+          -0.71
+        ],
+        [
+          2.482,
+          0.078
+        ],
+        [
+          0.215,
+          5.542
+        ]
+      ],
+      "walls": [
+        {
+          "id": "wall_1",
+          "start_point": [
+            -6.721,
+            1.438
+          ],
+          "end_point": [
+            -5.735,
+            0.362
+          ],
+          "length": {
+            "value": 1.46,
+            "ci_lower": 1.45,
+            "ci_upper": 1.47,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_2",
+          "start_point": [
+            -5.735,
+            0.362
+          ],
+          "end_point": [
+            -0.591,
+            -1.026
+          ],
+          "length": {
+            "value": 5.328,
+            "ci_lower": 5.301,
+            "ci_upper": 5.355,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [
+            {
+              "id": "door_wall_2_1",
+              "type": "door",
+              "wall_id": "wall_2",
+              "width": {
+                "value": 1.156,
+                "ci_lower": 1.141,
+                "ci_upper": 1.171,
+                "unit": "m",
+                "is_prior": false
+              },
+              "height": {
+                "value": null,
+                "ci_lower": null,
+                "ci_upper": null,
+                "unit": "m",
+                "is_prior": true
+              },
+              "sill_height": 0.0,
+              "position_along_wall": 0.578
+            }
+          ],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_3",
+          "start_point": [
+            -0.591,
+            -1.026
+          ],
+          "end_point": [
+            1.294,
+            -0.71
+          ],
+          "length": {
+            "value": 1.912,
+            "ci_lower": 1.902,
+            "ci_upper": 1.922,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_4",
+          "start_point": [
+            1.294,
+            -0.71
+          ],
+          "end_point": [
+            2.482,
+            0.078
+          ],
+          "length": {
+            "value": 1.425,
+            "ci_lower": 1.415,
+            "ci_upper": 1.435,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_5",
+          "start_point": [
+            2.482,
+            0.078
+          ],
+          "end_point": [
+            0.215,
+            5.542
+          ],
+          "length": {
+            "value": 5.916,
+            "ci_lower": 5.886,
+            "ci_upper": 5.946,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        },
+        {
+          "id": "wall_6",
+          "start_point": [
+            0.215,
+            5.542
+          ],
+          "end_point": [
+            -6.721,
+            1.438
+          ],
+          "length": {
+            "value": 8.059,
+            "ci_lower": 8.019,
+            "ci_upper": 8.099,
+            "unit": "m",
+            "is_prior": false
+          },
+          "height": {
+            "value": 1.8504,
+            "ci_lower": 1.838,
+            "ci_upper": 1.862,
+            "unit": "m",
+            "is_prior": false
+          },
+          "openings": [],
+          "adjacent_room_id": null
+        }
+      ],
+      "damage_regions": []
+    }
+  ],
+  "room_adjacencies": [],
+  "concealed_damage_flags": [],
+  "scope_of_work": [],
+  "drift_metrics": {
+    "total_path_length_m": 14.404,
+    "loop_closure_residual_m": 3.178,
+    "drift_correction_enabled": true,
+    "raw_point_count": 15758884,
+    "downsampled_point_count": 175652
+  },
+  "metadata": {
+    "room_count": 1,
+    "total_walls": 6,
+    "total_openings": 1,
+    "damages_detected": 0,
+    "concealed_hazards": 0,
+    "scope_items_count": 0
+  }
+}
