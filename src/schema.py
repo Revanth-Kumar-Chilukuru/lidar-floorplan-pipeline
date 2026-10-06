@@ -27,7 +27,7 @@ class Wall(BaseModel):
     id: str = Field(..., description="Unique wall identifier")
     start_point: List[float] = Field(..., description="2D [x, y] coordinates in room frame (meters)")
     end_point: List[float] = Field(..., description="2D [x, y] coordinates in room frame (meters)")
-    length: ConfidenceInterval = Field(..., description="Wall length in meters with confidence")
+    length: ConfidenceInterval = Field(..., description="Wall length in meters with heuristic confidence")
     height: ConfidenceInterval = Field(..., description="Wall height in meters")
     openings: List[Opening] = Field(default_factory=list, description="Openings in this wall")
     adjacent_room_id: Optional[str] = Field(None, description="Adjacent room if shared wall")
@@ -42,6 +42,7 @@ class DamageRegion(BaseModel):
     confidence: float = Field(..., description="Detection confidence score [0.0 - 1.0]")
     severity: str = Field("moderate", description="'low', 'moderate', 'severe'")
     bounding_box_2d: Optional[List[float]] = Field(None, description="Bounding coordinates [x_min, y_min, x_max, y_max]")
+    is_synthetic_demo: bool = Field(False, description="True if damage is simulated/synthetic and not a real detection")
 
 class ConcealedDamageFlag(BaseModel):
     """Rule-based inference of concealed damage behind visible surfaces."""
@@ -67,8 +68,8 @@ class RoomPlan(BaseModel):
     """Dimensioned geometric plan of a single room."""
     room_id: str = Field(..., description="Room identifier")
     room_name: str = Field("Room", description="Classified room type: 'living_room', 'bedroom', etc.")
-    ceiling_height: ConfidenceInterval = Field(..., description="Ceiling height with confidence interval")
-    floor_area: ConfidenceInterval = Field(..., description="Total floor area with confidence interval")
+    ceiling_height: ConfidenceInterval = Field(..., description="Ceiling height with heuristic confidence interval")
+    floor_area: ConfidenceInterval = Field(..., description="Total floor area with heuristic confidence interval")
     perimeter: float = Field(..., description="Total perimeter in meters")
     polygon_vertices: List[List[float]] = Field(..., description="Ordered 2D polygon vertices [[x1, y1], [x2, y2], ...]")
     walls: List[Wall] = Field(..., description="Wall segments defining the perimeter")

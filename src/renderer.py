@@ -143,6 +143,13 @@ class FloorPlanRenderer:
         # Set title and grid formatting
         display_title = title or f"{room.room_name} - Dimensioned Floor Plan"
         ax.set_title(display_title, fontsize=13, fontweight="bold", pad=15, color="#0F172A")
+        
+        if any(getattr(dmg, "is_synthetic_demo", False) for dmg in room.damage_regions):
+            ax.text(
+                0.5, 0.02, "SYNTHETIC DEMO - NOT DETECTED",
+                transform=ax.transAxes, fontsize=12, color="red", fontweight="bold", ha="center", va="bottom", alpha=0.7, zorder=10
+            )
+
         ax.set_aspect("equal", adjustable="datalim")
         ax.grid(True, linestyle=":", alpha=0.4, color="#94A3B8")
         ax.set_xlabel("X (meters)", fontsize=9, color="#64748B")
@@ -209,7 +216,7 @@ class FloorPlanRenderer:
         area_ci_low = property_plan.total_floor_area.ci_lower
         area_ci_up = property_plan.total_floor_area.ci_upper
         
-        ci_str = f" (CI: [{area_ci_low:.1f}, {area_ci_up:.1f}] m²)" if area_ci_low is not None and area_ci_up is not None else ""
+        ci_str = f" (Heuristic CI: [{area_ci_low:.1f}, {area_ci_up:.1f}] m²)" if area_ci_low is not None and area_ci_up is not None else ""
         
         header = (
             f"Whole Property Floor Plan - {property_plan.property_id} ({property_plan.capture_tier.upper()} Tier)\n"

@@ -51,6 +51,10 @@ def parse_args():
         "--room-name", type=str, default="Primary Room",
         help="Label for the scanned room"
     )
+    parser.add_argument(
+        "--demo-damage", action="store_true",
+        help="Inject synthetic damage detections (demo purposes only, not real measurements)"
+    )
     return parser.parse_args()
 
 def main():
@@ -111,16 +115,18 @@ def main():
             json.dump(output_json, f, indent=2)
         sys.exit(0)
         
-    # Damage Detection and Assessment
     primary_room = rooms[0]
-    damages = damage_engine.detect_surface_damage(primary_room)
-    primary_room.damage_regions = damages
     
-    # Concealed Damage Rule Inference
-    concealed_flags = damage_engine.evaluate_concealed_damage(damages)
-    
-    # Scope of Work Generation
-    scope_items = damage_engine.generate_scope_of_work(damages, concealed_flags, primary_room)
+    if args.demo_damage:
+        damages = damage_engine.detect_surface_damage(primary_room)
+        primary_room.damage_regions = damages
+        concealed_flags = damage_engine.evaluate_concealed_damage(damages)
+        scope_items = damage_engine.generate_scope_of_work(damages, concealed_flags, primary_room)
+    else:
+        damages = []
+        concealed_flags = []
+        scope_items = []
+        primary_room.damage_regions = []
     
     # Multi-Room Whole Property Assembly
     property_id = os.path.basename(os.path.normpath(args.input))

@@ -42,8 +42,8 @@ def check_trajectory_inside(scan_path):
     pct_inside = inside_count / total * 100
     print(f"Trajectory inside: {inside_count}/{total} points ({pct_inside:.1f}%)")
     
-    if pct_inside < 95.0:
-        print("FAIL: Camera trajectory significantly outside footprint!")
+    if pct_inside < 100.0:
+        print("FAIL: Camera trajectory is outside footprint!")
         return False
     print("PASS: Trajectory is inside footprint.")
     return True

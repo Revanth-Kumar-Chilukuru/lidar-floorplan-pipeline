@@ -335,6 +335,27 @@ class LidarReconstructionPipeline:
             
         # Area via shoelace formula
         poly = Polygon(room_corners)
+        if not poly.is_valid or not poly.is_simple:
+            # Repair using convex hull for invalid self-intersecting loops
+            poly = poly.convex_hull
+            # Overwrite room_corners with the repaired hull so the output is a valid polygon
+            if isinstance(poly, Polygon) and not poly.is_empty:
+                room_corners = np.array(poly.exterior.coords)[:-1]
+                # Re-calculate perimeter and walls if we repaired the footprint
+                walls_info = []
+                n_corners = len(room_corners)
+                total_perimeter = 0.0
+                for i in range(n_corners):
+                    p_start = room_corners[i]
+                    p_end = room_corners[(i + 1) % n_corners]
+                    length = float(np.linalg.norm(p_end - p_start))
+                    total_perimeter += length
+                    walls_info.append({
+                        "id": f"wall_rep_{i+1}",
+                        "start": [round(float(p_start[0]), 3), round(float(p_start[1]), 3)],
+                        "end": [round(float(p_end[0]), 3), round(float(p_end[1]), 3)],
+                        "length": round(length, 3),
+                    })
         floor_area = float(poly.area)
         
         return room_corners, walls_info, round(floor_area, 3), round(total_perimeter, 3)

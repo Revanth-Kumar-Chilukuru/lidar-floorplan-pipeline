@@ -112,7 +112,8 @@ class DamageAssessmentEngine:
                 metric_extent=extent,
                 confidence=round(p.get("confidence", 0.90), 2),
                 severity=p.get("severity", "moderate"),
-                bounding_box_2d=p.get("bbox")
+                bounding_box_2d=p.get("bbox"),
+                is_synthetic_demo=True
             ))
             
         return damage_regions
