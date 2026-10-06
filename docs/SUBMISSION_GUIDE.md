@@ -1,18 +1,18 @@
 # Submission Guide: Property Capture Pipeline
 
 **Project**: An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans and automated repair scopes of work.
-**Repository**: `<Your-Repo-Name>`
+**Repository**: `https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline`
 
 ## Quick Start (3 Commands)
 ```bash
 # 1. Clone and enter repo
-git clone <repo_url> && cd <repo_name>
+git clone https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline && cd lidar-floorplan-pipeline
 
 # 2. Setup environment (Python 3.11 required)
 uv venv --python 3.11 && uv pip install -r requirements.txt
 
 # 3. Reproduce all verified claims
-.venv/Scripts/python scripts/reproduce_all.py
+uv run python scripts/reproduce_all.py
 ```
 
 ## Device & Tier Matrix

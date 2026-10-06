@@ -16,8 +16,8 @@ An end-to-end pipeline that processes consumer smartphone LiDAR captures into di
 
 ### 1. Environment Setup
 ```bash
-git clone <this-repo>
-cd AI_Assignment_YC
+git clone https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline
+cd lidar-floorplan-pipeline
 
 # Create environment and install dependencies via uv
 uv venv --python 3.11

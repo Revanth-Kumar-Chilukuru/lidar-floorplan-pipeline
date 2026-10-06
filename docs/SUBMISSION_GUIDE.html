@@ -6,22 +6,23 @@
 <style>
 @page { size: A4; margin: 1.5cm; }
 body { font-family: -apple-system, sans-serif; font-size: 10.5pt; line-height: 1.45; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #cbd5e1; padding: 5px; text-align: left; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }
+th { background: #f1f5f9; }
 </style>
 </head>
 <body><h1>Submission Guide: Property Capture Pipeline</h1>
 <p><strong>Project</strong>: An end-to-end pipeline that processes consumer smartphone LiDAR captures into dimensioned 2D architectural floor plans and automated repair scopes of work.
-<strong>Repository</strong>: <code>&lt;Your-Repo-Name&gt;</code></p>
+<strong>Repository</strong>: <code>https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline</code></p>
 <h2>Quick Start (3 Commands)</h2>
 <pre><code class="language-bash"># 1. Clone and enter repo
-git clone &lt;repo_url&gt; &amp;&amp; cd &lt;repo_name&gt;
+git clone https://github.com/Revanth-Kumar-Chilukuru/lidar-floorplan-pipeline &amp;&amp; cd lidar-floorplan-pipeline
 
 # 2. Setup environment (Python 3.11 required)
 uv venv --python 3.11 &amp;&amp; uv pip install -r requirements.txt
 
 # 3. Reproduce all verified claims
-.venv/Scripts/python scripts/reproduce_all.py
+uv run python scripts/reproduce_all.py
 </code></pre>
 <h2>Device &amp; Tier Matrix</h2>
 <p>| Tier | Required Hardware | Status | What it Delivers |
